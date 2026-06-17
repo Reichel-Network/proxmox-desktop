@@ -12,3 +12,6 @@ build/icon-src.png
 # misc
 Thumbs.db
 *.tmp
+
+# landing page / promo site built separately
+website/
