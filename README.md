@@ -55,6 +55,10 @@ ships with by default.
 ### Light theme
 ![Light theme](docs/screenshots/12-light-theme.png)
 
+## What's new in v1.6.0
+
+- **Improved in-place auto-updater** — silent background download on launch, single-flight guards, persistent "update ready" badge in the sidebar, one-click restart & install.
+
 ## What's new in v1.5.0
 
 - **Real in-place auto-updater** — ProxTop checks GitHub Releases on launch, notifies when a new version is available, downloads it with a progress bar, and prompts to restart & install.
