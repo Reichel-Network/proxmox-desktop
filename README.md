@@ -9,6 +9,54 @@ It talks directly to the Proxmox REST API (`/api2/json`) from Electron's main pr
 bypasses browser CORS and transparently handles the self-signed TLS certificates that Proxmox
 ships with by default.
 
+## Screenshots
+
+> The screenshots below use demo data to show the full UI populated.
+
+### Dashboard
+![Dashboard](docs/screenshots/02-dashboard.png)
+
+### Virtual Machines
+![Virtual Machines](docs/screenshots/03-virtual-machines.png)
+
+### VM detail — live resource graphs
+![VM detail](docs/screenshots/04-vm-detail.png)
+
+### Backups & restore
+![Backups](docs/screenshots/07-backups.png)
+
+### Cluster health
+![Cluster health](docs/screenshots/08-cluster-health.png)
+
+### Network & firewall
+![Network & firewall](docs/screenshots/09-network-firewall.png)
+
+### Command palette (Ctrl+K)
+![Command palette](docs/screenshots/13-command-palette.png)
+
+### Connection manager
+![Connect](docs/screenshots/01-connect.png)
+
+### Light theme
+![Light theme](docs/screenshots/12-light-theme.png)
+
+<details>
+<summary>More screenshots</summary>
+
+### LXC Containers
+![Containers](docs/screenshots/05-containers.png)
+
+### Storage
+![Storage](docs/screenshots/06-storage.png)
+
+### Task log
+![Tasks](docs/screenshots/10-tasks.png)
+
+### Settings
+![Settings](docs/screenshots/11-settings.png)
+
+</details>
+
 ## Features
 
 - **Multiple saved connections** — manage several Proxmox hosts/clusters; credentials stored locally.
@@ -23,6 +71,21 @@ ships with by default.
 - **noVNC console** — one click opens the VM/CT console in your browser.
 - **Storage** — usage breakdown per volume across the cluster.
 - **Task log** — recent tasks per node with full log viewer and live status.
+- **Snapshots** — list, create, roll back, and delete VM/CT snapshots.
+- **Backups & restore** — browse backups per storage, trigger `vzdump`, restore, delete.
+- **VM/CT creation wizard** — guided flow to create new guests.
+- **Migration** — move a guest to another node.
+- **Guest config editor** — view/edit CPU, memory, disks, NICs, boot order, options.
+- **Notes & tags** — edit per-guest description and manage tags.
+- **Cluster health** — quorum, members, HA services, replication jobs.
+- **Network & firewall** — interfaces (bridges/bonds/VLANs) and firewall rules.
+- **Command palette** — `Ctrl+K` to search every VM/CT/node or jump to any page.
+- **Bulk actions** — multi-select guests and start/stop/shutdown together.
+- **Embedded noVNC console** — opens in-app; injects the auth cookie for password sessions.
+- **Encrypted credentials** — secrets stored via Windows DPAPI (`safeStorage`), not plaintext.
+- **Auto-update** — checks GitHub Releases, downloads, and installs new versions.
+- **Light / dark theme** — toggle in Settings.
+- **Native notifications** — alerts when a node/guest goes down or a task finishes.
 - **Auto-refresh** — all views poll on sensible intervals; manual refresh everywhere.
 
 ## Requirements
@@ -37,6 +100,18 @@ npm install        # install dependencies
 
 npm run dev        # run in development (Vite dev server + Electron, with DevTools)
 ```
+
+### Demo mode (no Proxmox host required)
+
+To explore the full UI with realistic demo data — useful for screenshots or
+evaluation — run the renderer with the mock backend enabled:
+
+```bash
+VITE_MOCK=1 npm run dev:renderer    # then open http://localhost:5273
+```
+
+The mock (`src/renderer/mock/mockBackend.ts`) is dev-only, gated behind the
+`VITE_MOCK` flag, and never included in production builds.
 
 ## Production build & packaging
 
