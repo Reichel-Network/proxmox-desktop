@@ -55,6 +55,14 @@ ships with by default.
 ### Light theme
 ![Light theme](docs/screenshots/12-light-theme.png)
 
+## What's new in v1.6.2
+
+- **Test release for auto-updater workflow** — tiny version bump to verify that installed v1.6.1 clients detect, download, and install a new release from GitHub.
+
+## What's new in v1.6.1
+
+- **Fixed blank window bug** caused by a missing `UpdateProvider` import in `main.tsx`.
+
 ## What's new in v1.6.0
 
 - **Improved in-place auto-updater** — silent background download on launch, single-flight guards, persistent "update ready" badge in the sidebar, one-click restart & install.
