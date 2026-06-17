@@ -6,12 +6,56 @@ import { usePolling } from '../utils/usePolling';
 import { ResourceBar } from '../components/widgets';
 import { Modal } from '../components/Modal';
 import { bytes, uptime, pct } from '../utils/format';
+import { useToast } from '../components/Toast';
+import { apiGet, apiPost, apiPut } from '../utils/api';
 import type { ClusterResource, RrdPoint, PveNode } from '@shared/types';
 
 const tooltipStyle = { background: '#1d2130', border: '1px solid #323849', borderRadius: 6, fontSize: 12 };
 
 function NodeDetail({ node, onClose }: { node: PveNode; onClose: () => void }) {
+  const toast = useToast();
   const [tf, setTf] = useState('hour');
+  const [syslog, setSyslog] = useState<string[]>([]);
+  const [showSyslog, setShowSyslog] = useState(false);
+  const [loadingSyslog, setLoadingSyslog] = useState(false);
+  const [maintenance, setMaintenance] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function loadSyslog() {
+    setLoadingSyslog(true);
+    setShowSyslog(true);
+    const res = await apiGet<any[]>(`/nodes/${node.node}/syslog`, { limit: 250, start: 0 });
+    if (res) {
+      setSyslog((res as any[]).map((l) => l.t || JSON.stringify(l)));
+    } else {
+      toast.error('Failed to load syslog');
+    }
+    setLoadingSyslog(false);
+  }
+
+  async function reboot() {
+    if (!window.confirm(`Reboot node "${node.node}"? Running guests may be affected.`)) return;
+    setBusy(true);
+    const res = await apiPost(`/nodes/${node.node}/status`, { command: 'reboot' });
+    setBusy(false);
+    if (res.ok) toast.success(`Rebooting ${node.node}`);
+    else toast.error(res.error || 'Failed to reboot');
+  }
+
+  async function toggleMaintenance() {
+    const next = !maintenance;
+    if (!window.confirm(`${next ? 'Enable' : 'Disable'} maintenance mode on "${node.node}"?`)) return;
+    setBusy(true);
+    const res = await apiPut(`/nodes/${node.node}/config`, { disable: next ? 1 : 0 });
+    setBusy(false);
+    if (res.ok) {
+      setMaintenance(next);
+      toast.success(`Maintenance ${next ? 'enabled' : 'disabled'}`);
+    } else {
+      toast.error(res.error || 'Failed');
+    }
+  }
+
   const { data: rrd } = usePolling<RrdPoint[]>(
     async () => {
       const res = await window.pmx.pve.rrd(node.node, 'node', null, tf);
@@ -40,6 +84,12 @@ function NodeDetail({ node, onClose }: { node: PveNode; onClose: () => void }) {
             {t === 'hour' ? '1H' : t === 'day' ? '24H' : t === 'week' ? '7D' : '30D'}
           </button>
         ))}
+        <div style={{ flex: 1 }} />
+        <button className="btn btn-sm" disabled={busy} onClick={loadSyslog}>📝 Syslog</button>
+        <button className="btn btn-sm" disabled={busy} onClick={toggleMaintenance}>
+          {maintenance ? '🔧 Exit maintenance' : '🔧 Maintenance mode'}
+        </button>
+        <button className="btn btn-sm btn-danger" disabled={busy} onClick={reboot}>⟳ Reboot node</button>
       </div>
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="card-head" style={{ fontSize: 13 }}>CPU Usage (%)</div>

@@ -23,6 +23,10 @@ export const IPC = {
   CONSOLE: 'pve:console',
   // Embedded console window
   CONSOLE_WINDOW: 'pve:consoleWindow',
+  // Side-panel embedded console (BrowserView)
+  EMBEDDED_CONSOLE_OPEN: 'console:embeddedOpen',
+  EMBEDDED_CONSOLE_CLOSE: 'console:embeddedClose',
+  EMBEDDED_CONSOLE_BOUNDS: 'console:embeddedBounds',
   // Settings (theme etc.)
   SETTINGS_GET: 'app:settingsGet',
   SETTINGS_SET: 'app:settingsSet',

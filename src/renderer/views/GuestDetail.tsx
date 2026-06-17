@@ -107,6 +107,27 @@ export function GuestDetail({
     else toast.error(res.error || 'Failed to open console');
   }
 
+  async function openEmbeddedConsole() {
+    const res = await window.pmx.pve.embeddedConsoleOpen(
+      `${guest.node}/${guest.type}/${guest.vmid}`,
+      guest.node,
+      guest.type,
+      guest.vmid,
+      guest.name || String(guest.vmid)
+    );
+    if (res.ok) {
+      // Notify main process of the anchor bounds so the BrowserView aligns precisely.
+      const anchor = document.getElementById('embedded-console-anchor');
+      if (anchor) {
+        const r = anchor.getBoundingClientRect();
+        await window.pmx.pve.embeddedConsoleBounds({ x: r.x, y: r.y, width: r.width, height: r.height });
+      }
+      toast.info('Console docked to the right side');
+    } else {
+      toast.error(res.error || 'Failed to open embedded console');
+    }
+  }
+
   const TABS: { key: Tab; label: string }[] = [
     { key: 'overview', label: '📊 Overview' },
     { key: 'snapshots', label: '📸 Snapshots' },
@@ -133,6 +154,7 @@ export function GuestDetail({
             </>
           )}
           <button className="btn btn-sm" onClick={() => setMigrating(true)}>➡ Migrate</button>
+          <button className="btn btn-sm" onClick={openEmbeddedConsole}>▣ Dock console</button>
           <button className="btn btn-sm btn-primary" onClick={openConsole}>🖥️ Console</button>
         </div>
       </div>

@@ -28,8 +28,14 @@ ships with by default.
 ### Cluster health
 ![Cluster health](docs/screenshots/08-cluster-health.png)
 
-### Network & firewall
-![Network & firewall](docs/screenshots/09-network-firewall.png)
+### Network & firewall — now with editing
+![Network & firewall](docs/screenshots/16-network-editing.png)
+
+### Node actions — reboot, maintenance mode, syslog
+![Node actions](docs/screenshots/17-node-actions.png)
+
+### VM detail — docked in-app console
+![Dock console](docs/screenshots/18-dock-console.png)
 
 ### Helper Scripts — community-scripts.org catalog
 ![Helper Scripts](docs/screenshots/14-helper-scripts.png)
@@ -45,6 +51,12 @@ ships with by default.
 
 ### Light theme
 ![Light theme](docs/screenshots/12-light-theme.png)
+
+## What's new in v1.3.0
+
+- **Docked in-app console** — open a guest console in a right-side BrowserView panel without leaving the app.
+- **Network & firewall editing** — add/edit/delete node interfaces and datacenter firewall rules.
+- **Node actions** — reboot a node, toggle maintenance mode, and view syslog directly from the node detail modal.
 
 <details>
 <summary>More screenshots</summary>
@@ -75,6 +87,7 @@ ships with by default.
 - **Lifecycle controls** — start / shutdown / reboot / stop, with confirmation on destructive actions.
 - **Guest detail** — live CPU, memory, network, and disk I/O graphs that auto-refresh.
 - **noVNC console** — one click opens the VM/CT console in your browser.
+- **Docked in-app console** — opens a guest console in a right-side BrowserView panel without leaving the app.
 - **Storage** — usage breakdown per volume across the cluster.
 - **Task log** — recent tasks per node with full log viewer and live status.
 - **Snapshots** — list, create, roll back, and delete VM/CT snapshots.
@@ -84,11 +97,12 @@ ships with by default.
 - **Guest config editor** — view/edit CPU, memory, disks, NICs, boot order, options.
 - **Notes & tags** — edit per-guest description and manage tags.
 - **Cluster health** — quorum, members, HA services, replication jobs.
-- **Network & firewall** — interfaces (bridges/bonds/VLANs) and firewall rules.
+- **Network & firewall** — view, create, edit, and delete node interfaces (bridges/bonds/VLANs) and datacenter firewall rules.
+- **Node actions** — reboot a node, toggle maintenance mode, and view syslog.
 - **Helper Scripts** — browse the [community-scripts.org](https://community-scripts.org) catalog (480+ LXC/VM/PVE scripts) and install with one click via an embedded node shell.
 - **Command palette** — `Ctrl+K` to search every VM/CT/node or jump to any page.
 - **Bulk actions** — multi-select guests and start/stop/shutdown together.
-- **Embedded noVNC console** — opens in-app; injects the auth cookie for password sessions.
+- **Embedded noVNC console window** — separate in-app window; injects the auth cookie for password sessions.
 - **Encrypted credentials** — secrets stored via Windows DPAPI (`safeStorage`), not plaintext.
 - **Auto-update** — checks GitHub Releases, downloads, and installs new versions.
 - **Light / dark theme** — toggle in Settings.

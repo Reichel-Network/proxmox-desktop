@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, safeStorage, Notification } from 'electron';
+import { app, BrowserWindow, BrowserView, ipcMain, shell, safeStorage, Notification } from 'electron';
 import path from 'node:path';
 import Store from 'electron-store';
 import { autoUpdater } from 'electron-updater';
@@ -97,6 +97,16 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+
+  mainWindow.on('resize', () => {
+    if (embeddedConsoleView && embeddedConsoleShowing && mainWindow) {
+      const [w, h] = mainWindow.getContentSize();
+      const panelW = Math.max(320, Math.floor(w * 0.35));
+      const topY = 64; // matches .main padding-top
+      embeddedConsoleView.setBounds({ x: w - panelW, y: topY, width: panelW, height: h - topY });
+      resizeMainContent(panelW);
+    }
   });
 }
 
@@ -333,6 +343,83 @@ ipcMain.handle(
     return { ok: true };
   }
 );
+
+// ---------------- Side-panel embedded console (BrowserView) ----------------
+// A single BrowserView docked to the right half of the main window.
+let embeddedConsoleView: BrowserView | null = null;
+let embeddedConsoleKey: string | null = null;
+let embeddedConsoleShowing = false;
+
+function removeEmbeddedConsole() {
+  if (embeddedConsoleView && !embeddedConsoleView.webContents.isDestroyed()) {
+    mainWindow?.removeBrowserView(embeddedConsoleView);
+    (embeddedConsoleView.webContents as any)?.destroy?.();
+    embeddedConsoleView = null;
+  }
+  embeddedConsoleKey = null;
+  embeddedConsoleShowing = false;
+}
+
+function resizeMainContent(width?: number) {
+  if (!mainWindow) return;
+  const [w, h] = mainWindow.getContentSize();
+  const panelW = embeddedConsoleShowing && width ? width : 0;
+  mainWindow.webContents.send('console:layout', { panelW });
+}
+
+ipcMain.handle(IPC.EMBEDDED_CONSOLE_OPEN, async (_e, key: string, node: string, type: 'qemu' | 'lxc', vmid: number, name?: string) => {
+  if (!mainWindow) return { ok: false, error: 'No main window' };
+  const c = ensureClient();
+  const base = c.buildConsoleBaseUrl();
+  const consoleType = type === 'qemu' ? 'kvm' : 'lxc';
+  const url = `${base}/?console=${consoleType}&novnc=1&vmid=${vmid}&vmname=${encodeURIComponent(name || String(vmid))}&node=${node}&resize=scale`;
+
+  if (embeddedConsoleKey === key && embeddedConsoleView && !embeddedConsoleView.webContents.isDestroyed()) {
+    if (!embeddedConsoleShowing) {
+      mainWindow.addBrowserView(embeddedConsoleView);
+      embeddedConsoleShowing = true;
+      resizeMainContent(480);
+    }
+    return { ok: true };
+  }
+
+  removeEmbeddedConsole();
+  embeddedConsoleView = new BrowserView({
+    webPreferences: { partition: 'persist:pve-console-embed' },
+  });
+  embeddedConsoleKey = key;
+  embeddedConsoleShowing = true;
+  mainWindow.addBrowserView(embeddedConsoleView);
+
+  const ticket = c.getAuthTicket();
+  if (ticket) {
+    try {
+      await embeddedConsoleView.webContents.session.cookies.set({
+        url: base,
+        name: 'PVEAuthCookie',
+        value: ticket,
+      });
+    } catch { /* ignore */ }
+  }
+  await embeddedConsoleView.webContents.loadURL(url);
+  resizeMainContent(480);
+  return { ok: true };
+});
+
+ipcMain.handle(IPC.EMBEDDED_CONSOLE_CLOSE, () => {
+  removeEmbeddedConsole();
+  resizeMainContent();
+  return { ok: true };
+});
+
+ipcMain.handle(IPC.EMBEDDED_CONSOLE_BOUNDS, (_e, bounds: { x: number; y: number; width: number; height: number }) => {
+  if (embeddedConsoleView && embeddedConsoleShowing && mainWindow) {
+    const [cx] = mainWindow.getContentSize();
+    const panelX = cx - bounds.width;
+    embeddedConsoleView.setBounds({ x: Math.max(panelX, 0), y: bounds.y, width: bounds.width, height: bounds.height });
+  }
+  return { ok: true };
+});
 
 ipcMain.handle(IPC.OPEN_EXTERNAL, (_e, url: string) => {
   shell.openExternal(url);

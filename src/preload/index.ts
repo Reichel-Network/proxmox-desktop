@@ -24,41 +24,35 @@ const api = {
     current: (): Promise<ApiResult<ConnectionProfile>> => ipcRenderer.invoke(IPC.CURRENT),
   },
   pve: {
-    get: (path: string, params?: Record<string, any>): Promise<ApiResult> =>
-      ipcRenderer.invoke(IPC.API_GET, path, params),
-    post: (path: string, params?: Record<string, any>): Promise<ApiResult> =>
-      ipcRenderer.invoke(IPC.API_POST, path, params),
-    put: (path: string, params?: Record<string, any>): Promise<ApiResult> =>
-      ipcRenderer.invoke(IPC.API_PUT, path, params),
-    del: (path: string, params?: Record<string, any>): Promise<ApiResult> =>
-      ipcRenderer.invoke(IPC.API_DELETE, path, params),
+    get: (p: string, params?: Record<string, any>): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.API_GET, p, params),
+    post: (p: string, params?: Record<string, any>): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.API_POST, p, params),
+    put: (p: string, params?: Record<string, any>): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.API_PUT, p, params),
+    del: (p: string, params?: Record<string, any>): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.API_DELETE, p, params),
     clusterResources: (type?: string): Promise<ApiResult> =>
       ipcRenderer.invoke(IPC.CLUSTER_RESOURCES, type),
     nodes: (): Promise<ApiResult> => ipcRenderer.invoke(IPC.NODES),
-    guestAction: (
-      node: string,
-      type: 'qemu' | 'lxc',
-      vmid: number,
-      action: GuestAction
-    ): Promise<ApiResult> => ipcRenderer.invoke(IPC.GUEST_ACTION, node, type, vmid, action),
-    rrd: (
-      node: string,
-      type: 'qemu' | 'lxc' | 'node',
-      vmid: number | null,
-      timeframe: string
-    ): Promise<ApiResult> => ipcRenderer.invoke(IPC.RRD, node, type, vmid, timeframe),
-    tasks: (node: string, limit?: number): Promise<ApiResult> =>
-      ipcRenderer.invoke(IPC.TASKS, node, limit),
-    taskLog: (node: string, upid: string): Promise<ApiResult> =>
-      ipcRenderer.invoke(IPC.TASK_LOG, node, upid),
+    guestAction: (node: string, type: 'qemu' | 'lxc', vmid: number, action: GuestAction): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.GUEST_ACTION, node, type, vmid, action),
+    rrd: (node: string, type: 'qemu' | 'lxc' | 'node', vmid: number | null, timeframe: string): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.RRD, node, type, vmid, timeframe),
+    tasks: (node: string, limit = 50): Promise<ApiResult> => ipcRenderer.invoke(IPC.TASKS, node, limit),
+    taskLog: (node: string, upid: string): Promise<ApiResult> => ipcRenderer.invoke(IPC.TASK_LOG, node, upid),
     console: (node: string, type: 'qemu' | 'lxc', vmid: number): Promise<ApiResult> =>
       ipcRenderer.invoke(IPC.CONSOLE, node, type, vmid),
-    consoleWindow: (
-      node: string,
-      type: 'qemu' | 'lxc',
-      vmid: number,
-      name: string
-    ): Promise<ApiResult> => ipcRenderer.invoke(IPC.CONSOLE_WINDOW, node, type, vmid, name),
+    consoleWindow: (node: string, type: 'qemu' | 'lxc', vmid: number, name: string): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.CONSOLE_WINDOW, node, type, vmid, name),
+    embeddedConsoleOpen: (key: string, node: string, type: 'qemu' | 'lxc', vmid: number, name?: string): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.EMBEDDED_CONSOLE_OPEN, key, node, type, vmid, name),
+    embeddedConsoleClose: (): Promise<ApiResult> => ipcRenderer.invoke(IPC.EMBEDDED_CONSOLE_CLOSE),
+    onConsoleLayout: (cb: (payload: { panelW: number }) => void) => {
+      const listener = (_e: unknown, p: { panelW: number }) => cb(p);
+      ipcRenderer.on('console:layout', listener);
+      return () => ipcRenderer.removeListener('console:layout', listener);
+    },
   },
   settings: {
     get: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_GET),

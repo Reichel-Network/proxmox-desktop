@@ -62,8 +62,15 @@ function Shell({
   const [view, setView] = useState<View>('dashboard');
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteGuest, setPaletteGuest] = useState<PveGuest | null>(null);
+  const [consolePanelW, setConsolePanelW] = useState(0);
 
   useClusterMonitor(true);
+
+  // Listen for main-process console panel layout updates.
+  useEffect(() => {
+    const unsub = window.pmx.pve.onConsoleLayout((p) => setConsolePanelW(p.panelW));
+    return unsub;
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -98,6 +105,11 @@ function Shell({
     await window.pmx.pve.guestAction(g.node, g.type, g.vmid, action);
   }
 
+  async function closeEmbeddedConsole() {
+    await window.pmx.pve.embeddedConsoleClose();
+    setConsolePanelW(0);
+  }
+
   return (
     <div className="app-shell">
       <div className="sidebar">
@@ -127,6 +139,12 @@ function Shell({
             onClick={() => setPaletteOpen(true)}>
             🔍 Search <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>Ctrl+K</span>
           </button>
+          {consolePanelW > 0 && (
+            <button className="btn btn-sm" style={{ width: '100%', justifyContent: 'center', marginBottom: 8 }}
+              onClick={closeEmbeddedConsole}>
+              ✕ Close embedded console
+            </button>
+          )}
           <div style={{ fontSize: 11, color: 'var(--text-faint)', marginBottom: 8, padding: '0 4px' }}>
             {profile.host}:{profile.port}
             <br />
@@ -138,7 +156,7 @@ function Shell({
         </div>
       </div>
 
-      <div className="main">
+      <div className="main" style={{ marginRight: consolePanelW }}>
         <div className="topbar">
           <h1>{TITLES[view]}</h1>
           <div className="topbar-spacer" />
@@ -162,6 +180,21 @@ function Shell({
           )}
         </div>
       </div>
+
+      {consolePanelW > 0 && (
+        <div
+          id="embedded-console-anchor"
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 64,
+            width: consolePanelW,
+            height: 'calc(100% - 64px)',
+            pointerEvents: 'none',
+            opacity: 0,
+          }}
+        />
+      )}
 
       <CommandPalette
         open={paletteOpen}

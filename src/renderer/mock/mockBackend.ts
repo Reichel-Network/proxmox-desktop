@@ -253,6 +253,15 @@ function get(path: string, params?: Record<string, any>): Promise<ApiResult> {
   }
   if (/\/network$/.test(path)) return Promise.resolve(networkIfaces());
   if (/\/firewall\/rules$/.test(path)) return Promise.resolve(firewallRules());
+  if (/\/syslog$/.test(path)) {
+    return Promise.resolve(wrap([
+      { t: 'Jun 17 10:42:12 pve-01 kernel: Linux version 6.8.12-1-pve' },
+      { t: 'Jun 17 10:42:13 pve-01 pveproxy[1234]: starting server' },
+      { t: 'Jun 17 10:42:15 pve-01 pvedaemon[1240]: starting server' },
+      { t: 'Jun 17 10:42:18 pve-01 pvestatd[1251]: status update ready' },
+      { t: 'Jun 17 10:45:02 pve-01 pveproxy[1234]: accepted auth token for root@pam' },
+    ]));
+  }
   if (/\/nodes\/[^/]+\/qemu$/.test(path)) return Promise.resolve(wrap(QEMU.filter((v) => path.includes(v.node))));
   if (/\/nodes\/[^/]+\/lxc$/.test(path)) return Promise.resolve(wrap(LXC.filter((v) => path.includes(v.node))));
   return Promise.resolve(wrap([]));
@@ -293,6 +302,13 @@ const mockPmx = {
     ])),
     console: () => Promise.resolve(ok({ url: 'https://10.0.0.11:8006', type: 'novnc' })),
     consoleWindow: () => Promise.resolve({ ok: true }),
+    embeddedConsoleOpen: () => Promise.resolve(ok({ panelW: 540 })),
+    embeddedConsoleClose: () => Promise.resolve(ok({})),
+    embeddedConsoleBounds: () => Promise.resolve(ok({})),
+    onConsoleLayout: (cb: any) => {
+      setTimeout(() => cb({ panelW: 0 }), 10);
+      return () => {};
+    },
   },
   scripts: {
     catalog: () => Promise.resolve(ok(MOCK_CATALOG)),
