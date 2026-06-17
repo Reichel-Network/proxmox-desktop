@@ -1,6 +1,6 @@
 {
   "name": "proxmox-desktop",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Full-featured desktop client for Proxmox VE",
   "author": "Proxmox Desktop",
   "license": "MIT",
@@ -19,21 +19,25 @@
     "release": "npm run build && electron-builder --win --x64 --publish always"
   },
   "dependencies": {
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
     "electron-store": "^8.2.0",
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.3.9",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "electron": "^33.3.1",
     "electron-builder": "^25.1.8",
-    "recharts": "^2.15.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "recharts": "^2.15.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vite-plugin-electron-renderer": "^0.14.6"
@@ -53,7 +57,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico",

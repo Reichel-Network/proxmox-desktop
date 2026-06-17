@@ -35,6 +35,16 @@ export const IPC = {
   // External
   OPEN_EXTERNAL: 'app:openExternal',
   APP_VERSION: 'app:version',
+  // Community helper scripts catalog
+  SCRIPTS_CATALOG: 'scripts:catalog',
+  SCRIPTS_DETAIL: 'scripts:detail',
+  // Node shell (termproxy websocket bridge)
+  SHELL_OPEN: 'shell:open',
+  SHELL_DATA: 'shell:data',     // main -> renderer: output chunk
+  SHELL_INPUT: 'shell:input',   // renderer -> main: keystrokes
+  SHELL_RESIZE: 'shell:resize',
+  SHELL_CLOSE: 'shell:close',
+  SHELL_STATUS: 'shell:status', // main -> renderer: open/closed/error
 } as const;
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC];

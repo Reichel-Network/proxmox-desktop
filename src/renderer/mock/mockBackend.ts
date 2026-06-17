@@ -15,6 +15,36 @@ const wrap = <T,>(d: T): ApiResult => ({ ok: true, status: 200, data: { data: d 
 
 const now = Math.floor(Date.now() / 1000);
 
+// ---- Helper Scripts catalog (demo subset of community-scripts.org) ----
+const mockShellData: Array<(d: string) => void> = [];
+const mockShellStatus: Array<(s: any) => void> = [];
+
+const MOCK_CATALOG = {
+  fetchedAt: now * 1000,
+  categories: [
+    { id: 1, name: 'Proxmox & Virtualization', sort_order: 1, icon: 'server', description: 'Manage Proxmox VE and virtualization.' },
+    { id: 9, name: 'Media & Streaming', sort_order: 9, icon: 'clapperboard', description: 'Media servers and streaming apps.' },
+    { id: 13, name: 'Network & DNS', sort_order: 13, icon: 'network', description: 'Networking, DNS, and proxy tools.' },
+    { id: 14, name: 'Databases', sort_order: 14, icon: 'database', description: 'Database servers and tools.' },
+    { id: 16, name: 'Monitoring & Analytics', sort_order: 16, icon: 'activity', description: 'Monitoring and dashboards.' },
+    { id: 21, name: 'Home Automation', sort_order: 21, icon: 'home', description: 'Smart home and automation.' },
+  ],
+  scripts: [
+    { name: 'Plex Media Server', slug: 'plex', categories: [9], type: 'ct', updateable: true, privileged: false, interface_port: 32400, website: 'https://www.plex.tv/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/plex.webp', description: 'Plex organizes your media and streams it to any device, beautifully.', install_methods: [{ type: 'default', script: 'ct/plex.sh', resources: { cpu: 2, ram: 2048, hdd: 8, os: 'ubuntu', version: '24.04' } }], notes: [{ text: 'With Privileged/Unprivileged Hardware Acceleration Support', type: 'info' }] },
+    { name: 'Jellyfin', slug: 'jellyfin', categories: [9], type: 'ct', updateable: true, privileged: true, interface_port: 8096, website: 'https://jellyfin.org/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/jellyfin.webp', description: 'The free software media system that puts you in control of your media.', install_methods: [{ type: 'default', script: 'ct/jellyfin.sh', resources: { cpu: 2, ram: 2048, hdd: 8, os: 'ubuntu', version: '22.04' } }] },
+    { name: 'AdGuard Home', slug: 'adguard', categories: [13], type: 'ct', updateable: true, privileged: false, interface_port: 3000, website: 'https://adguard.com/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/adguard-home.webp', description: 'Network-wide ads & trackers blocking DNS server.', install_methods: [{ type: 'default', script: 'ct/adguard.sh', resources: { cpu: 1, ram: 512, hdd: 2, os: 'debian', version: '12' } }] },
+    { name: 'Pi-hole', slug: 'pihole', categories: [13], type: 'ct', updateable: true, privileged: false, interface_port: 80, website: 'https://pi-hole.net/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/pi-hole.webp', description: 'A black hole for Internet advertisements — network-wide ad blocking.', install_methods: [{ type: 'default', script: 'ct/pihole.sh', resources: { cpu: 1, ram: 512, hdd: 2, os: 'debian', version: '12' } }] },
+    { name: 'PostgreSQL', slug: 'postgresql', categories: [14], type: 'ct', updateable: false, privileged: false, interface_port: 5432, website: 'https://www.postgresql.org/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/postgresql.webp', description: 'The world\'s most advanced open source relational database.', install_methods: [{ type: 'default', script: 'ct/postgresql.sh', resources: { cpu: 2, ram: 2048, hdd: 8, os: 'debian', version: '12' } }] },
+    { name: 'Grafana', slug: 'grafana', categories: [16], type: 'ct', updateable: true, privileged: false, interface_port: 3000, website: 'https://grafana.com/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/grafana.webp', description: 'Operational dashboards for your metrics, logs, and traces.', install_methods: [{ type: 'default', script: 'ct/grafana.sh', resources: { cpu: 1, ram: 1024, hdd: 4, os: 'debian', version: '12' } }] },
+    { name: 'Home Assistant OS', slug: 'haos-vm', categories: [21], type: 'vm', updateable: false, privileged: false, interface_port: 8123, website: 'https://www.home-assistant.io/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/home-assistant.webp', description: 'Open source home automation that puts local control and privacy first.', install_methods: [{ type: 'default', script: 'vm/haos-vm.sh', resources: { cpu: 2, ram: 4096, hdd: 32, os: 'haos', version: '' } }], notes: [{ text: 'Runs as a full VM (HAOS), not an LXC container.', type: 'warning' }] },
+    { name: 'Proxmox VE Post Install', slug: 'post-pve-install', categories: [1], type: 'pve', updateable: false, privileged: false, interface_port: null, website: 'https://community-scripts.org/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/proxmox.webp', description: 'Configures Proxmox repos (disable enterprise, enable no-subscription) and applies common post-install tweaks.', install_methods: [{ type: 'default', script: 'tools/pve/post-pve-install.sh', resources: { cpu: 1, ram: 512, hdd: 1, os: '', version: '' } }], notes: [{ text: 'Run once per node right after installing Proxmox VE.', type: 'info' }] },
+    { name: 'Docker', slug: 'docker', categories: [1], type: 'ct', updateable: false, privileged: false, interface_port: null, website: 'https://www.docker.com/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/docker.webp', description: 'Container runtime — LXC pre-configured with Docker & Docker Compose.', install_methods: [{ type: 'default', script: 'ct/docker.sh', resources: { cpu: 2, ram: 2048, hdd: 16, os: 'debian', version: '12' } }] },
+    { name: 'Nginx Proxy Manager', slug: 'nginxproxymanager', categories: [13], type: 'ct', updateable: true, privileged: false, interface_port: 81, website: 'https://nginxproxymanager.com/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/nginx-proxy-manager.webp', description: 'Easily expose your services with a clean web UI and free SSL.', install_methods: [{ type: 'default', script: 'ct/nginxproxymanager.sh', resources: { cpu: 1, ram: 1024, hdd: 4, os: 'debian', version: '12' } }] },
+    { name: 'Gitea', slug: 'gitea', categories: [1], type: 'ct', updateable: true, privileged: false, interface_port: 3000, website: 'https://gitea.io/', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/gitea.webp', description: 'A painless, self-hosted Git service.', install_methods: [{ type: 'default', script: 'ct/gitea.sh', resources: { cpu: 1, ram: 1024, hdd: 8, os: 'debian', version: '12' } }] },
+    { name: 'Uptime Kuma', slug: 'uptimekuma', categories: [16], type: 'ct', updateable: true, privileged: false, interface_port: 3001, website: 'https://github.com/louislam/uptime-kuma', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/uptime-kuma.webp', description: 'A fancy self-hosted monitoring tool — uptime, status pages, alerts.', install_methods: [{ type: 'default', script: 'ct/uptimekuma.sh', resources: { cpu: 1, ram: 1024, hdd: 4, os: 'debian', version: '12' } }] },
+  ],
+};
+
 // ---- Cluster resources (nodes, vms, lxc, storage) ----
 const NODES = [
   { node: 'pve-01', status: 'online', cpu: 0.23, maxcpu: 32, mem: 38_654_705_664, maxmem: 137_438_953_472, disk: 412_316_860_416, maxdisk: 1_099_511_627_776, uptime: 4_233_600, level: '', type: 'node', id: 'node/pve-01' },
@@ -263,6 +293,63 @@ const mockPmx = {
     ])),
     console: () => Promise.resolve(ok({ url: 'https://10.0.0.11:8006', type: 'novnc' })),
     consoleWindow: () => Promise.resolve({ ok: true }),
+  },
+  scripts: {
+    catalog: () => Promise.resolve(ok(MOCK_CATALOG)),
+    detail: (entry: any) =>
+      Promise.resolve(
+        ok({
+          command: entry?.install_methods?.[0]?.script
+            ? `bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/${entry.install_methods[0].script})"`
+            : null,
+        })
+      ),
+  },
+  shell: {
+    open: (_node: string) => {
+      // Simulate a connected shell with a short scripted session.
+      setTimeout(() => mockShellStatus.forEach((cb) => cb({ state: 'open' })), 300);
+      setTimeout(() => {
+        const lines = [
+          '\x1b[2m__          ______ _      _____ ____  __  __ ______\x1b[0m\r\n',
+          'Welcome to the Proxmox VE node shell (demo).\r\n',
+          'root@pve-01:~# ',
+        ];
+        lines.forEach((l, i) => setTimeout(() => mockShellData.forEach((cb) => cb(l)), i * 120));
+      }, 500);
+      return Promise.resolve({ ok: true });
+    },
+    input: (_node: string, data: string) => {
+      // Echo input and, on Enter, print a fake install progress trace.
+      mockShellData.forEach((cb) => cb(data.replace(/\n/g, '\r\n')));
+      if (data.includes('\n')) {
+        const trace = [
+          '\x1b[36m✓ Using Default Settings\x1b[0m\r\n',
+          '\x1b[36m✓ Creating LXC Container\x1b[0m\r\n',
+          '\x1b[36m✓ Installing Dependencies\x1b[0m\r\n',
+          '\x1b[36m✓ Setting up Application\x1b[0m\r\n',
+          '\x1b[32m✓ Completed Successfully!\x1b[0m\r\n',
+          'root@pve-01:~# ',
+        ];
+        trace.forEach((l, i) => setTimeout(() => mockShellData.forEach((cb) => cb(l)), 400 + i * 350));
+      }
+    },
+    resize: (_n: string, _c: number, _r: number) => {},
+    close: (_n: string) => {},
+    onData: (cb: (d: string) => void) => {
+      mockShellData.push(cb);
+      return () => {
+        const i = mockShellData.indexOf(cb);
+        if (i >= 0) mockShellData.splice(i, 1);
+      };
+    },
+    onStatus: (cb: (s: any) => void) => {
+      mockShellStatus.push(cb);
+      return () => {
+        const i = mockShellStatus.indexOf(cb);
+        if (i >= 0) mockShellStatus.splice(i, 1);
+      };
+    },
   },
   settings: {
     get: () => Promise.resolve({ theme: 'dark', confirmDestructive: true, autoCheckUpdates: true }),

@@ -6,6 +6,8 @@ import type {
   GuestAction,
   AppSettings,
   UpdateStatus,
+  ScriptEntry,
+  ShellStatus,
 } from '../shared/types';
 
 const api = {
@@ -77,6 +79,29 @@ const api = {
     ipcRenderer.invoke(IPC.NOTIFY, title, body),
   version: (): Promise<string> => ipcRenderer.invoke(IPC.APP_VERSION),
   openExternal: (url: string): Promise<ApiResult> => ipcRenderer.invoke(IPC.OPEN_EXTERNAL, url),
+  scripts: {
+    catalog: (forceRefresh?: boolean): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.SCRIPTS_CATALOG, forceRefresh),
+    detail: (entry: ScriptEntry, methodType?: string): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.SCRIPTS_DETAIL, entry, methodType),
+  },
+  shell: {
+    open: (node: string): Promise<ApiResult> => ipcRenderer.invoke(IPC.SHELL_OPEN, node),
+    input: (node: string, data: string) => ipcRenderer.send(IPC.SHELL_INPUT, node, data),
+    resize: (node: string, cols: number, rows: number) =>
+      ipcRenderer.send(IPC.SHELL_RESIZE, node, cols, rows),
+    close: (node: string) => ipcRenderer.send(IPC.SHELL_CLOSE, node),
+    onData: (cb: (data: string) => void) => {
+      const listener = (_e: unknown, data: string) => cb(data);
+      ipcRenderer.on(IPC.SHELL_DATA, listener);
+      return () => ipcRenderer.removeListener(IPC.SHELL_DATA, listener);
+    },
+    onStatus: (cb: (s: ShellStatus) => void) => {
+      const listener = (_e: unknown, s: ShellStatus) => cb(s);
+      ipcRenderer.on(IPC.SHELL_STATUS, listener);
+      return () => ipcRenderer.removeListener(IPC.SHELL_STATUS, listener);
+    },
+  },
 };
 
 contextBridge.exposeInMainWorld('pmx', api);

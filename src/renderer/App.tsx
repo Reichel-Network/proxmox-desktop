@@ -9,6 +9,7 @@ import { Tasks } from './views/Tasks';
 import { Backups } from './views/Backups';
 import { ClusterHealth } from './views/ClusterHealth';
 import { Network } from './views/Network';
+import { HelperScripts } from './views/HelperScripts';
 import { Settings } from './views/Settings';
 import { CommandPalette } from './views/CommandPalette';
 import { GuestDetail } from './views/GuestDetail';
@@ -17,7 +18,7 @@ import type { ConnectionProfile, AppSettings, ClusterResource, PveGuest, GuestAc
 
 type View =
   | 'dashboard' | 'nodes' | 'qemu' | 'lxc' | 'storage'
-  | 'backups' | 'tasks' | 'cluster' | 'network' | 'settings';
+  | 'backups' | 'tasks' | 'cluster' | 'network' | 'scripts' | 'settings';
 
 const NAV: { key: View; label: string; icon: string; group?: string }[] = [
   { key: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -28,6 +29,7 @@ const NAV: { key: View; label: string; icon: string; group?: string }[] = [
   { key: 'backups', label: 'Backups', icon: '💿' },
   { key: 'cluster', label: 'Cluster Health', icon: '🖧' },
   { key: 'network', label: 'Network & Firewall', icon: '🌐' },
+  { key: 'scripts', label: 'Helper Scripts', icon: '🧩' },
   { key: 'tasks', label: 'Tasks', icon: '📋' },
   { key: 'settings', label: 'Settings', icon: '⚙️' },
 ];
@@ -42,6 +44,7 @@ const TITLES: Record<View, string> = {
   tasks: 'Task Log',
   cluster: 'Cluster Health',
   network: 'Network & Firewall',
+  scripts: 'Helper Scripts',
   settings: 'Settings',
 };
 
@@ -152,6 +155,7 @@ function Shell({
           {view === 'backups' && <Backups />}
           {view === 'cluster' && <ClusterHealth />}
           {view === 'network' && <Network />}
+          {view === 'scripts' && <HelperScripts />}
           {view === 'tasks' && <Tasks />}
           {view === 'settings' && (
             <Settings profile={profile} settings={settings} onSettingsChange={onSettingsChange} />

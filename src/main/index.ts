@@ -3,8 +3,10 @@ import path from 'node:path';
 import Store from 'electron-store';
 import { autoUpdater } from 'electron-updater';
 import { ProxmoxClient } from './ProxmoxClient';
+import { getCatalog, buildInstallCommand } from './ScriptCatalog';
+import { NodeShell } from './NodeShell';
 import { IPC } from '../shared/ipc';
-import type { ConnectionProfile, GuestAction, AppSettings } from '../shared/types';
+import type { ConnectionProfile, GuestAction, AppSettings, ScriptEntry } from '../shared/types';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -335,4 +337,51 @@ ipcMain.handle(
 ipcMain.handle(IPC.OPEN_EXTERNAL, (_e, url: string) => {
   shell.openExternal(url);
   return { ok: true };
+});
+
+// ---------------- Community Helper Scripts catalog ----------------
+ipcMain.handle(IPC.SCRIPTS_CATALOG, async (_e, forceRefresh?: boolean) => {
+  try {
+    const catalog = await getCatalog(!!forceRefresh);
+    return { ok: true, data: catalog };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || 'Failed to fetch script catalog' };
+  }
+});
+
+ipcMain.handle(IPC.SCRIPTS_DETAIL, (_e, entry: ScriptEntry, methodType?: string) => {
+  const command = buildInstallCommand(entry, methodType || 'default');
+  return { ok: true, data: { command } };
+});
+
+// ---------------- Node shell (termproxy websocket) ----------------
+const shells = new Map<string, NodeShell>();
+
+ipcMain.handle(IPC.SHELL_OPEN, async (e, node: string) => {
+  const c = client;
+  if (!c) return { ok: false, error: 'Not connected' };
+  const win = BrowserWindow.fromWebContents(e.sender);
+  if (!win) return { ok: false, error: 'No window' };
+
+  // One shell per node per window.
+  const key = node;
+  const existing = shells.get(key);
+  if (existing) existing.close();
+
+  const shell = new NodeShell(win, IPC.SHELL_STATUS, IPC.SHELL_DATA);
+  shells.set(key, shell);
+  return shell.open(c, node);
+});
+
+ipcMain.on(IPC.SHELL_INPUT, (_e, node: string, data: string) => {
+  shells.get(node)?.write(data);
+});
+
+ipcMain.on(IPC.SHELL_RESIZE, (_e, node: string, cols: number, rows: number) => {
+  shells.get(node)?.resize(cols, rows);
+});
+
+ipcMain.on(IPC.SHELL_CLOSE, (_e, node: string) => {
+  shells.get(node)?.close();
+  shells.delete(node);
 });

@@ -144,6 +144,63 @@ export interface AppSettings {
   autoCheckUpdates: boolean;
 }
 
+// ---- Community Helper Scripts (community-scripts.org) ----
+export interface ScriptCategory {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  sort_order?: number;
+}
+
+export interface ScriptInstallMethod {
+  type: string; // 'default' | 'alpine' | ...
+  script: string; // e.g. 'ct/plex.sh'
+  resources: {
+    cpu?: number;
+    ram?: number;
+    hdd?: number;
+    os?: string;
+    version?: string;
+  };
+}
+
+export interface ScriptNote {
+  text: string;
+  type: string; // 'info' | 'warning' | ...
+}
+
+export interface ScriptEntry {
+  name: string;
+  slug: string;
+  categories: number[];
+  date_created?: string;
+  type: string; // 'ct' | 'vm' | 'pve' | 'addon'
+  updateable?: boolean;
+  privileged?: boolean;
+  interface_port?: number | null;
+  documentation?: string | null;
+  website?: string | null;
+  logo?: string | null;
+  config_path?: string;
+  description?: string;
+  install_methods?: ScriptInstallMethod[];
+  default_credentials?: { username?: string | null; password?: string | null };
+  notes?: ScriptNote[];
+}
+
+export interface ScriptCatalog {
+  categories: ScriptCategory[];
+  scripts: ScriptEntry[];
+  fetchedAt: number;
+}
+
+// ---- Node shell (termproxy) ----
+export interface ShellStatus {
+  state: 'connecting' | 'open' | 'closed' | 'error';
+  message?: string;
+}
+
 export interface UpdateStatus {
   event: 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error';
   version?: string;

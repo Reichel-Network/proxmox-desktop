@@ -31,6 +31,12 @@ ships with by default.
 ### Network & firewall
 ![Network & firewall](docs/screenshots/09-network-firewall.png)
 
+### Helper Scripts — community-scripts.org catalog
+![Helper Scripts](docs/screenshots/14-helper-scripts.png)
+
+### Helper Scripts — script detail & one-click install
+![Script detail](docs/screenshots/15-script-detail.png)
+
 ### Command palette (Ctrl+K)
 ![Command palette](docs/screenshots/13-command-palette.png)
 
@@ -79,6 +85,7 @@ ships with by default.
 - **Notes & tags** — edit per-guest description and manage tags.
 - **Cluster health** — quorum, members, HA services, replication jobs.
 - **Network & firewall** — interfaces (bridges/bonds/VLANs) and firewall rules.
+- **Helper Scripts** — browse the [community-scripts.org](https://community-scripts.org) catalog (480+ LXC/VM/PVE scripts) and install with one click via an embedded node shell.
 - **Command palette** — `Ctrl+K` to search every VM/CT/node or jump to any page.
 - **Bulk actions** — multi-select guests and start/stop/shutdown together.
 - **Embedded noVNC console** — opens in-app; injects the auth cookie for password sessions.
@@ -168,6 +175,28 @@ Once a release is published, installed copies of the app detect the new version
 3. **Uncheck "Privilege Separation"** for full access, or assign roles explicitly.
 4. Copy the secret — it is shown only once.
 5. In the app choose **API Token**, enter `root@pam!desktop` as the Token ID and paste the secret.
+
+## Helper Scripts (community-scripts.org)
+
+The **Helper Scripts** view integrates the community-maintained
+[Proxmox VE Helper-Scripts](https://community-scripts.org) catalog (480+ scripts for
+installing LXC apps, VMs, and PVE tools).
+
+- **Browse & search** the full catalog by category and type, with logos, resource
+  requirements, and notes. Metadata is fetched in the main process (avoiding CORS)
+  and cached for 6 hours.
+- **One-click install** opens an embedded `xterm.js` terminal bound to the target
+  node's shell (Proxmox `termproxy` websocket) and runs the script's
+  `bash -c "$(curl -fsSL …)"` install command.
+- **Copy command** is always available as an alternative.
+
+> **Auth note:** live in-app execution uses the Proxmox shell websocket, which
+> requires **password (ticket) authentication**. API-token sessions can browse the
+> catalog and copy commands, but to run a script in-app, connect with username/password.
+
+> **Disclaimer:** these scripts are community-maintained and **not affiliated with or
+> endorsed by Proxmox**. Review each script before running it on your nodes. This app
+> simply surfaces and launches them.
 
 ## Project structure
 

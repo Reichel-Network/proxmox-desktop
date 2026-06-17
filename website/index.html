@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Proxmox Desktop — a full-featured Windows desktop client for Proxmox VE. Manage VMs, LXC containers, storage, backups, cluster health and more from a native Electron app.">
+  <meta name="theme-color" content="#e57000">
+  <title>Proxmox Desktop — Native Windows Client for Proxmox VE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23e57000'/%3E%3Ctext x='50' y='68' font-size='58' font-family='system-ui' font-weight='700' text-anchor='middle' fill='white'%3EP%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="Proxmox Desktop home">
+        <span class="brand-mark">P</span>
+        <span class="brand-text">Proxmox Desktop</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#gallery">Screenshots</a>
+        <a href="#getting-started">Getting Started</a>
+        <a href="#download">Download</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn btn-ghost" href="https://github.com/Reichel-Network/proxmox-desktop" target="_blank" rel="noopener">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+          GitHub
+        </a>
+        <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+          <span class="theme-icon-light">☀</span>
+          <span class="theme-icon-dark">☾</span>
+        </button>
+        <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="hero-pretitle">Open source · Windows · Electron + React</div>
+            <h1 class="hero-title">The desktop client Proxmox VE was missing.</h1>
+            <p class="hero-subtitle">
+              A native Windows app that talks directly to the Proxmox REST API — no browser tabs, no CORS workarounds, no certificate warnings. Manage your homelab or production cluster from one clean interface.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary btn-lg" href="#download">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414L12 15zM4 12a8 8 0 1116 0 8 8 0 01-16 0zm8-10C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/></svg>
+                Download for Windows
+              </a>
+              <a class="btn btn-ghost btn-lg" href="https://github.com/Reichel-Network/proxmox-desktop" target="_blank" rel="noopener">
+                View on GitHub
+              </a>
+            </div>
+            <div class="hero-meta">
+              <span class="meta-item"><span class="dot green"></span> Windows 10/11</span>
+              <span class="meta-item"><span class="dot orange"></span> Node.js 18+</span>
+              <span class="meta-item"><span class="dot green"></span> MIT License</span>
+            </div>
+            <div class="badges-row">
+              <img src="https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/ci.yml/badge.svg" alt="CI status" class="status-badge">
+              <img src="https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/release.yml/badge.svg" alt="Release status" class="status-badge">
+            </div>
+          </div>
+          <div class="hero-media">
+            <div class="window-frame">
+              <div class="window-titlebar">
+                <span class="window-dot red"></span>
+                <span class="window-dot yellow"></span>
+                <span class="window-dot green"></span>
+                <span class="window-title">Dashboard — Homelab Cluster</span>
+              </div>
+              <img src="images/02-dashboard.png" alt="Proxmox Desktop dashboard showing a three-node cluster with resource usage summary" loading="eager">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Capabilities</span>
+          <h2 class="section-title">Everything you manage in the web UI, faster.</h2>
+          <p class="section-desc">
+            Built for daily Proxmox operators. Connect once, then fly through VMs, containers, storage, backups, networking, and cluster health with a keyboard-first desktop experience.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Direct API Connection</h3>
+            <p>Connects from Electron's main process, bypassing browser CORS and accepting self-signed certificates with an optional per-profile SSL toggle.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🔐</div>
+            <h3>Token or Password Auth</h3>
+            <p>Use API tokens (<code>user@realm!tokenid</code>) or username/password. Credentials are encrypted with Windows DPAPI and stored locally.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🖥️</div>
+            <h3>Cluster Dashboard</h3>
+            <p>See nodes, VMs, containers, CPU, memory, and storage at a glance with live resource bars and real-time status indicators.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">💻</div>
+            <h3>VMs &amp; Containers</h3>
+            <p>List, search, filter, and control QEMU and LXC guests. Start, shutdown, reboot, stop, migrate, and edit guest configs from one surface.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Live Resource Graphs</h3>
+            <p>Per-node RRD history charts and guest-level CPU, memory, network, and disk I/O graphs that auto-refresh as you watch.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🖧</div>
+            <h3>Embedded noVNC Console</h3>
+            <p>Open VM and container consoles in-app. Auth cookies are injected automatically for password-based sessions.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">💿</div>
+            <h3>Backups &amp; Restore</h3>
+            <p>Browse backups per storage, trigger <code>vzdump</code>, restore guests, and delete old backups without leaving the app.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3>Command Palette</h3>
+            <p>Press <kbd>Ctrl</kbd> <kbd>K</kbd> to jump to any page or open any VM, container, or node instantly. No mouse required.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Cluster Health &amp; Networking</h3>
+            <p>Monitor quorum, members, HA services, replication, network interfaces, bridges, bonds, VLANs, and firewall rules.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🌙</div>
+            <h3>Dark &amp; Light Themes</h3>
+            <p>Choose the theme that fits your environment. The whole UI — including charts, tables, and forms — adapts cleanly.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h3>Auto-Update</h3>
+            <p>Built-in updater checks GitHub Releases and installs new Windows builds automatically via CI/CD pipelines.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">⌨️</div>
+            <h3>Keyboard First</h3>
+            <p>Shortcuts for navigation, search, refresh, and lifecycle actions. Designed to keep admins moving fast.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="highlight-section">
+      <div class="container">
+        <div class="highlight-grid">
+          <div class="highlight-copy">
+            <span class="section-label">Connection</span>
+            <h2>Connect the way your lab is set up.</h2>
+            <p>Save multiple connections, pick API token or password auth, and disable SSL verification for self-signed Proxmox certificates. Each profile is stored and encrypted locally, never sent anywhere.</p>
+            <ul class="checklist">
+              <li>Multiple saved connections</li>
+              <li>API token + password support</li>
+              <li>Per-profile SSL verification toggle</li>
+              <li>Windows DPAPI encrypted secrets</li>
+            </ul>
+          </div>
+          <div class="highlight-media">
+            <div class="window-frame no-titlebar">
+              <img src="images/01-connect.png" alt="Proxmox Desktop connection screen with saved profiles and authentication options" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery-section" id="gallery">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Screenshots</span>
+          <h2 class="section-title">See the whole surface.</h2>
+          <p class="section-desc">
+            All screenshots are captured from the built-in demo mode — every view populated so you can evaluate the UI without a Proxmox host.
+          </p>
+        </div>
+
+        <div class="gallery-tabs" role="tablist" aria-label="Screenshot categories">
+          <button class="tab active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+          <button class="tab" data-tab="guests" role="tab" aria-selected="false">Guests</button>
+          <button class="tab" data-tab="cluster" role="tab" aria-selected="false">Cluster &amp; Net</button>
+          <button class="tab" data-tab="utility" role="tab" aria-selected="false">Tools</button>
+        </div>
+
+        <div class="gallery-panels">
+          <div class="gallery-panel active" id="panel-overview" role="tabpanel">
+            <figure class="shot shot-hero">
+              <div class="window-frame">
+                <img src="images/02-dashboard.png" alt="Cluster dashboard with summary cards and node resource table" loading="lazy">
+              </div>
+              <figcaption>Dashboard — cluster-wide resources and node health</figcaption>
+            </figure>
+            <div class="shot-grid">
+              <figure class="shot">
+                <div class="window-frame"><img src="images/13-command-palette.png" alt="Command palette with Ctrl+K search" loading="lazy"></div>
+                <figcaption>Command palette</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/11-settings.png" alt="Settings panel" loading="lazy"></div>
+                <figcaption>Settings &amp; updates</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/12-light-theme.png" alt="Light theme dashboard" loading="lazy"></div>
+                <figcaption>Light theme</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <div class="gallery-panel" id="panel-guests" role="tabpanel" hidden>
+            <div class="shot-grid">
+              <figure class="shot">
+                <div class="window-frame"><img src="images/03-virtual-machines.png" alt="Virtual machines list" loading="lazy"></div>
+                <figcaption>Virtual machines</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/04-vm-detail.png" alt="VM detail with live graphs" loading="lazy"></div>
+                <figcaption>VM detail with live graphs</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/05-containers.png" alt="LXC containers list" loading="lazy"></div>
+                <figcaption>LXC containers</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/10-tasks.png" alt="Task log viewer" loading="lazy"></div>
+                <figcaption>Task log</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <div class="gallery-panel" id="panel-cluster" role="tabpanel" hidden>
+            <div class="shot-grid">
+              <figure class="shot">
+                <div class="window-frame"><img src="images/06-storage.png" alt="Storage usage view" loading="lazy"></div>
+                <figcaption>Storage</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/07-backups.png" alt="Backups and restore view" loading="lazy"></div>
+                <figcaption>Backups &amp; restore</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/08-cluster-health.png" alt="Cluster health view" loading="lazy"></div>
+                <figcaption>Cluster health</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/09-network-firewall.png" alt="Network and firewall view" loading="lazy"></div>
+                <figcaption>Network &amp; firewall</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <div class="gallery-panel" id="panel-utility" role="tabpanel" hidden>
+            <div class="shot-grid">
+              <figure class="shot">
+                <div class="window-frame"><img src="images/01-connect.png" alt="Connection manager" loading="lazy"></div>
+                <figcaption>Connection manager</figcaption>
+              </figure>
+              <figure class="shot">
+                <div class="window-frame"><img src="images/12-light-theme.png" alt="Light theme" loading="lazy"></div>
+                <figcaption>Light theme</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="getting-started" id="getting-started">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Getting Started</span>
+          <h2 class="section-title">Run it in two commands.</h2>
+          <p class="section-desc">
+            Clone, install, and run. Or download the latest Windows installer from GitHub Releases.
+          </p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>Clone &amp; install</h3>
+            <div class="code-block"><pre><code>git clone https://github.com/Reichel-Network/proxmox-desktop.git
+cd proxmox-desktop
+npm install</code></pre></div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>Run in development</h3>
+            <div class="code-block"><pre><code>npm run dev</code></pre></div>
+            <p class="step-note">Opens Electron + Vite with DevTools.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>Try demo mode</h3>
+            <div class="code-block"><pre><code>VITE_MOCK=1 npm run dev:renderer</code></pre></div>
+            <p class="step-note">No Proxmox host required — open http://localhost:5273.</p>
+          </div>
+        </div>
+
+        <div class="build-note">
+          <p>
+            <strong>Build &amp; package:</strong> <code>npm run build</code> compiles everything; <code>npm run dist</code> creates the Windows NSIS installer in <code>release/</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="download-section" id="download">
+      <div class="container">
+        <div class="download-card">
+          <div class="download-copy">
+            <h2>Download Proxmox Desktop</h2>
+            <p>Latest release includes the Windows installer, auto-update metadata, and blockmap. Released automatically via GitHub Actions.</p>
+            <div class="download-actions">
+              <a class="btn btn-primary btn-lg" href="https://github.com/Reichel-Network/proxmox-desktop/releases/latest" target="_blank" rel="noopener">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414L12 15zM4 12a8 8 0 1116 0 8 8 0 01-16 0zm8-10C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/></svg>
+                Latest Windows Release
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/Reichel-Network/proxmox-desktop/blob/main/README.md" target="_blank" rel="noopener">
+                Read the docs
+              </a>
+            </div>
+            <div class="download-meta">
+              <span>Windows 10/11 · x64</span>
+              <span>MIT License</span>
+              <span>No account required</span>
+            </div>
+          </div>
+          <div class="download-artifact">
+            <div class="artifact-card">
+              <div class="artifact-icon">🗗</div>
+              <div class="artifact-name">Proxmox Desktop-Setup-1.1.0.exe</div>
+              <div class="artifact-hint">Windows NSIS installer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark small">P</span>
+        <span>Proxmox Desktop</span>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="https://github.com/Reichel-Network/proxmox-desktop" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Reichel-Network/proxmox-desktop/issues" target="_blank" rel="noopener">Issues</a>
+        <a href="https://github.com/Reichel-Network/proxmox-desktop/releases" target="_blank" rel="noopener">Releases</a>
+        <a href="https://github.com/Reichel-Network/proxmox-desktop/blob/main/README.md" target="_blank" rel="noopener">README</a>
+      </nav>
+      <div class="footer-copy">
+        <p>© 2026 Proxmox Desktop. MIT licensed.</p>
+        <p>Built by <a href="https://github.com/tobiasreichel" target="_blank" rel="noopener">Tobias Reichel</a> &amp; Reichel Network.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
