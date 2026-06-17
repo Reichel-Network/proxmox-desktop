@@ -1,5 +1,8 @@
 # Proxmox Desktop
 
+[![CI](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/ci.yml/badge.svg)](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/ci.yml)
+[![Release](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/release.yml/badge.svg)](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/release.yml)
+
 A full-featured Windows desktop client for **Proxmox VE**, built with Electron + React + TypeScript.
 
 It talks directly to the Proxmox REST API (`/api2/json`) from Electron's main process, so it
@@ -46,7 +49,42 @@ npm run dist:dir   # build an unpacked app directory (faster, for testing)
 ```
 
 The installer is produced by **electron-builder** and lands in `release/` as
-`Proxmox Desktop-Setup-1.0.0.exe`.
+`Proxmox Desktop-Setup-<version>.exe`.
+
+## Releasing (CI/CD)
+
+Releases are fully automated via GitHub Actions. Every push to `main` runs the
+**CI** workflow (type-check + build + package smoke test). Pushing a **version tag**
+runs the **Release** workflow, which builds the Windows installer and publishes a
+GitHub Release with the installer, `latest.yml`, and blockmap — the artifacts the
+in-app auto-updater consumes.
+
+To cut a release:
+
+```bash
+# 1. Bump the version in package.json (e.g. 1.1.0 -> 1.2.0)
+npm version 1.2.0 --no-git-tag-version
+
+# 2. Commit and push
+git add -A && git commit -m "Release v1.2.0" && git push
+
+# 3. Tag and push the tag — this triggers the Release workflow
+git tag v1.2.0 && git push origin v1.2.0
+```
+
+The GitHub Action (`.github/workflows/release.yml`) does the rest. No secrets to
+configure — it uses the built-in `GITHUB_TOKEN`. You can also trigger it manually
+from the Actions tab via **workflow_dispatch**.
+
+To publish from your own machine instead of CI:
+
+```bash
+export GH_TOKEN=<your-personal-access-token>   # repo scope
+npm run release
+```
+
+Once a release is published, installed copies of the app detect the new version
+(Settings → Check for updates, or automatically on launch) and update themselves.
 
 ## Creating an API token in Proxmox (recommended)
 

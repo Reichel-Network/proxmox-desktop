@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "start": "cross-env NODE_ENV=production electron .",
     "dist": "npm run build && electron-builder --win --x64",
-    "dist:dir": "npm run build && electron-builder --win --dir"
+    "dist:dir": "npm run build && electron-builder --win --dir",
+    "release": "npm run build && electron-builder --win --x64 --publish always"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
@@ -63,6 +64,13 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Reichel-Network",
+        "repo": "proxmox-desktop"
+      }
+    ]
   }
 }
