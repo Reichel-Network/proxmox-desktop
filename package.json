@@ -69,7 +69,8 @@
       {
         "provider": "github",
         "owner": "Reichel-Network",
-        "repo": "proxmox-desktop"
+        "repo": "proxmox-desktop",
+        "releaseType": "release"
       }
     ]
   }
