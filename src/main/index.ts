@@ -130,51 +130,91 @@ app.on('window-all-closed', () => {
 });
 
 // ---------------- Auto update ----------------
+let checking = false;
+let downloadInProgress = false;
+let updateDownloaded = false;
+
 function setupAutoUpdate() {
   autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoInstallOnAppQuit = false; // we handle install manually to avoid races
 
   const send = (payload: any) => {
     mainWindow?.webContents.send(IPC.UPDATE_EVENT, payload);
   };
 
   autoUpdater.on('checking-for-update', () => send({ event: 'checking' }));
-  autoUpdater.on('update-available', (info) => send({ event: 'available', version: info.version }));
+  autoUpdater.on('update-available', (info) => {
+    updateDownloaded = false;
+    send({ event: 'available', version: info.version });
+    const settings = store.get('settings');
+    if (settings.autoCheckUpdates && !isDev && !downloadInProgress) {
+      // Silently pre-download in the background so the user just has to restart.
+      downloadInProgress = true;
+      autoUpdater.downloadUpdate().catch((err) => {
+        downloadInProgress = false;
+        send({ event: 'error', message: String(err?.message || err) });
+      });
+    }
+  });
   autoUpdater.on('update-not-available', () => send({ event: 'not-available' }));
-  autoUpdater.on('download-progress', (p) =>
-    send({ event: 'downloading', percent: Math.round(p.percent) })
-  );
-  autoUpdater.on('update-downloaded', (info) => send({ event: 'downloaded', version: info.version }));
-  autoUpdater.on('error', (err) => send({ event: 'error', message: String(err?.message || err) }));
+  autoUpdater.on('download-progress', (p) => {
+    downloadInProgress = true;
+    send({ event: 'downloading', percent: Math.round(p.percent || 0) });
+  });
+  autoUpdater.on('update-downloaded', (info) => {
+    downloadInProgress = false;
+    if (!updateDownloaded) {
+      updateDownloaded = true;
+      send({ event: 'downloaded', version: info.version });
+    }
+  });
+  autoUpdater.on('error', (err) => {
+    downloadInProgress = false;
+    send({ event: 'error', message: String(err?.message || err) });
+  });
 
   const settings = store.get('settings');
   if (settings.autoCheckUpdates && !isDev) {
-    // Delay so the window is ready; ignore failure when no update server configured.
-    setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 4000);
+    setTimeout(() => {
+      if (!checking) {
+        checking = true;
+        autoUpdater.checkForUpdates()
+          .catch(() => {})
+          .finally(() => { checking = false; });
+      }
+    }, 4000);
   }
 }
 
 ipcMain.handle(IPC.UPDATE_CHECK, async () => {
+  if (checking) return { ok: true, data: null };
+  checking = true;
   try {
     const r = await autoUpdater.checkForUpdates();
     return { ok: true, data: { version: r?.updateInfo?.version } };
   } catch (e: any) {
     return { ok: false, error: e?.message || 'Update check failed (no update server configured)' };
+  } finally {
+    checking = false;
   }
 });
 
 ipcMain.handle(IPC.UPDATE_DOWNLOAD, async () => {
+  if (downloadInProgress || updateDownloaded) return { ok: true };
+  downloadInProgress = true;
   try {
     await autoUpdater.downloadUpdate();
     return { ok: true };
   } catch (e: any) {
+    downloadInProgress = false;
     return { ok: false, error: e?.message || 'Download failed' };
   }
 });
 
 ipcMain.handle(IPC.UPDATE_INSTALL, async () => {
   try {
-    autoUpdater.quitAndInstall(true, true);
+    // isSilent=false shows update dialog, isForceRunAfter=true restarts the app.
+    setImmediate(() => autoUpdater.quitAndInstall(false, true));
     return { ok: true };
   } catch (e: any) {
     return { ok: false, error: e?.message || 'Install failed' };

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ToastProvider } from './components/Toast';
 import { UpdateManager } from './components/UpdateManager';
+import { useUpdate } from './components/UpdateContext';
 import { ConnectScreen } from './views/ConnectScreen';
 import { Dashboard } from './views/Dashboard';
 import { Nodes } from './views/Nodes';
@@ -64,6 +65,7 @@ function Shell({
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteGuest, setPaletteGuest] = useState<PveGuest | null>(null);
   const [consolePanelW, setConsolePanelW] = useState(0);
+  const { ready, version, status } = useUpdate();
 
   useClusterMonitor(true);
 
@@ -121,6 +123,15 @@ function Shell({
             <div className="sidebar-host" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
               {profile.name}
             </div>
+            {ready && (
+              <button
+                className="update-badge"
+                onClick={() => setView('settings')}
+                title={`Update v${version} ready — click to install`}
+              >
+                ⬆ v{version} ready
+              </button>
+            )}
           </div>
         </div>
         <nav className="sidebar-nav">
