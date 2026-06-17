@@ -102,7 +102,7 @@ function createWindow() {
   mainWindow.on('resize', () => {
     if (embeddedConsoleView && embeddedConsoleShowing && mainWindow) {
       const [w, h] = mainWindow.getContentSize();
-      const panelW = Math.max(320, Math.floor(w * 0.35));
+      const panelW = Math.min(420, Math.floor(w * 0.45));
       const topY = 64; // matches .main padding-top
       embeddedConsoleView.setBounds({ x: w - panelW, y: topY, width: panelW, height: h - topY });
       resizeMainContent(panelW);
@@ -426,7 +426,7 @@ ipcMain.handle(IPC.EMBEDDED_CONSOLE_OPEN, async (_e, key: string, node: string, 
     if (!embeddedConsoleShowing) {
       mainWindow.addBrowserView(embeddedConsoleView);
       embeddedConsoleShowing = true;
-      resizeMainContent(480);
+      resizeMainContent(420);
     }
     return { ok: true };
   }
@@ -450,7 +450,7 @@ ipcMain.handle(IPC.EMBEDDED_CONSOLE_OPEN, async (_e, key: string, node: string, 
     } catch { /* ignore */ }
   }
   await embeddedConsoleView.webContents.loadURL(url);
-  resizeMainContent(480);
+  resizeMainContent(420);
   return { ok: true };
 });
 

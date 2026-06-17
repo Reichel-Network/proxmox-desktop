@@ -69,10 +69,21 @@ function Shell({
 
   useClusterMonitor(true);
 
-  // Listen for main-process console panel layout updates.
+  // Listen for main-process console panel layout updates and keep BrowserView aligned.
   useEffect(() => {
     const unsub = window.pmx.pve.onConsoleLayout((p) => setConsolePanelW(p.panelW));
-    return unsub;
+    const onResize = () => {
+      const anchor = document.getElementById('embedded-console-anchor');
+      if (anchor) {
+        const r = anchor.getBoundingClientRect();
+        window.pmx.pve.embeddedConsoleBounds({ x: r.x, y: r.y, width: r.width, height: r.height });
+      }
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      unsub();
+      window.removeEventListener('resize', onResize);
+    };
   }, []);
 
   // Keyboard shortcuts
@@ -196,16 +207,26 @@ function Shell({
       {consolePanelW > 0 && (
         <div
           id="embedded-console-anchor"
+          className="embedded-console-anchor"
           style={{
             position: 'absolute',
             right: 0,
             top: 64,
             width: consolePanelW,
             height: 'calc(100% - 64px)',
-            pointerEvents: 'none',
-            opacity: 0,
           }}
-        />
+        >
+          <button
+            className="embedded-console-close"
+            onClick={closeEmbeddedConsole}
+            title="Close docked console"
+          >
+            ✕
+          </button>
+          <div className="embedded-console-resize-hint" onMouseDown={(e) => e.preventDefault()}>
+            ⋮⋮
+          </div>
+        </div>
       )}
 
       <CommandPalette
