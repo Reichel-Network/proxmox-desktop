@@ -25,8 +25,10 @@ export function ConnectScreen({ onConnected }: { onConnected: (p: ConnectionProf
   const [connecting, setConnecting] = useState(false);
   const [remember, setRemember] = useState(true);
   const [editingExisting, setEditingExisting] = useState(false);
+  const [version, setVersion] = useState('');
 
   useEffect(() => {
+    window.pmx.version().then(setVersion);
     window.pmx.profiles.list().then((p) => {
       setProfiles(p);
       if (p.length) {
@@ -96,7 +98,7 @@ export function ConnectScreen({ onConnected }: { onConnected: (p: ConnectionProf
             <div className="sidebar-logo">P</div>
             <div>
               <div className="connect-brand-name">ProxTop</div>
-              <div className="connect-brand-sub">Proxmox VE Management Client</div>
+              <div className="connect-brand-sub">Proxmox VE Management Client · v{version}</div>
             </div>
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10, fontWeight: 600 }}>
