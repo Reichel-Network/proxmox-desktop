@@ -95,8 +95,8 @@ export function ConnectScreen({ onConnected }: { onConnected: (p: ConnectionProf
           <div className="connect-brand">
             <div className="sidebar-logo">P</div>
             <div>
-              <div className="connect-brand-name">Proxmox Desktop</div>
-              <div className="connect-brand-sub">VE Management Client</div>
+              <div className="connect-brand-name">ProxTop</div>
+              <div className="connect-brand-sub">Proxmox VE Management Client</div>
             </div>
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10, fontWeight: 600 }}>

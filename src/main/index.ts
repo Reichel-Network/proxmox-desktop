@@ -16,7 +16,7 @@ interface StoreShape {
 }
 
 const store = new Store<StoreShape>({
-  name: 'proxmox-desktop',
+  name: 'proxtop',
   defaults: {
     profiles: [],
     settings: { theme: 'dark', confirmDestructive: true, autoCheckUpdates: true },
@@ -77,7 +77,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 640,
     backgroundColor: '#0f1117',
-    title: 'Proxmox Desktop',
+    title: 'ProxTop',
     autoHideMenuBar: true,
     icon: isDev ? path.join(process.cwd(), 'build/icon.ico') : undefined,
     webPreferences: {

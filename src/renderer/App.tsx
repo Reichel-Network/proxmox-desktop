@@ -116,7 +116,7 @@ function Shell({
         <div className="sidebar-header">
           <div className="sidebar-logo">P</div>
           <div style={{ overflow: 'hidden' }}>
-            <div className="sidebar-title">Proxmox Desktop</div>
+            <div className="sidebar-title">ProxTop</div>
             <div className="sidebar-host" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
               {profile.name}
             </div>

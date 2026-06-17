@@ -21,7 +21,7 @@ function fetchJson<T = any>(url: string): Promise<T> {
       url,
       {
         headers: {
-          'User-Agent': 'proxmox-desktop',
+          'User-Agent': 'proxtop',
           Accept: 'application/json,application/vnd.github+json',
         },
         timeout: 30_000,

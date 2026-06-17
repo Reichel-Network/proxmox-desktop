@@ -1,8 +1,8 @@
 {
-  "name": "proxmox-desktop",
-  "version": "1.3.0",
-  "description": "Full-featured desktop client for Proxmox VE",
-  "author": "Proxmox Desktop",
+  "name": "proxtop",
+  "version": "1.4.0",
+  "description": "ProxTop — a full-featured desktop client for Proxmox VE",
+  "author": "ProxTop",
   "license": "MIT",
   "main": "dist/main/index.js",
   "scripts": {
@@ -43,8 +43,8 @@
     "vite-plugin-electron-renderer": "^0.14.6"
   },
   "build": {
-    "appId": "com.proxmoxdesktop.app",
-    "productName": "Proxmox Desktop",
+    "appId": "com.proxtop.app",
+    "productName": "ProxTop",
     "directories": {
       "output": "release",
       "buildResources": "build"

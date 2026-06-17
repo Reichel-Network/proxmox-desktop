@@ -1,11 +1,11 @@
-# Proxmox Desktop
+# ProxTop
 
 [![CI](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/ci.yml/badge.svg)](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/ci.yml)
 [![Release](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/release.yml/badge.svg)](https://github.com/Reichel-Network/proxmox-desktop/actions/workflows/release.yml)
 
 A full-featured Windows desktop client for **Proxmox VE**, built with Electron + React + TypeScript.
 
-It talks directly to the Proxmox REST API (`/api2/json`) from Electron's main process, so it
+**ProxTop** talks directly to the Proxmox REST API (`/api2/json`) from Electron's main process, so it
 bypasses browser CORS and transparently handles the self-signed TLS certificates that Proxmox
 ships with by default.
 
@@ -145,7 +145,7 @@ npm run dist:dir   # build an unpacked app directory (faster, for testing)
 ```
 
 The installer is produced by **electron-builder** and lands in `release/` as
-`Proxmox Desktop-Setup-<version>.exe`.
+`ProxTop-Setup-<version>.exe`.
 
 ## Releasing (CI/CD)
 

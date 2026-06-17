@@ -384,5 +384,5 @@ const mockPmx = {
 export function installMock() {
   (window as any).pmx = mockPmx;
   // eslint-disable-next-line no-console
-  console.info('[proxmox-desktop] MOCK backend active — demo data, no real host.');
+  console.info('[proxtop] MOCK backend active — demo data, no real host.');
 }
