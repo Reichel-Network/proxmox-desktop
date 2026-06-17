@@ -1,5 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { UpdateProvider } from './components/UpdateContext';
 import { App } from './App';
 import './styles/global.css';
 
