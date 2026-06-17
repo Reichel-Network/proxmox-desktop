@@ -60,6 +60,7 @@ const api = {
   },
   updates: {
     check: (): Promise<ApiResult> => ipcRenderer.invoke(IPC.UPDATE_CHECK),
+    download: (): Promise<ApiResult> => ipcRenderer.invoke(IPC.UPDATE_DOWNLOAD),
     install: (): Promise<ApiResult> => ipcRenderer.invoke(IPC.UPDATE_INSTALL),
     onEvent: (cb: (s: UpdateStatus) => void) => {
       const listener = (_e: unknown, payload: UpdateStatus) => cb(payload);

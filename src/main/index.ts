@@ -163,13 +163,21 @@ ipcMain.handle(IPC.UPDATE_CHECK, async () => {
   }
 });
 
-ipcMain.handle(IPC.UPDATE_INSTALL, async () => {
+ipcMain.handle(IPC.UPDATE_DOWNLOAD, async () => {
   try {
     await autoUpdater.downloadUpdate();
-    autoUpdater.quitAndInstall();
     return { ok: true };
   } catch (e: any) {
     return { ok: false, error: e?.message || 'Download failed' };
+  }
+});
+
+ipcMain.handle(IPC.UPDATE_INSTALL, async () => {
+  try {
+    autoUpdater.quitAndInstall(true, true);
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || 'Install failed' };
   }
 });
 

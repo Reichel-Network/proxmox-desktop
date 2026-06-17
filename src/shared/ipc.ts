@@ -33,6 +33,7 @@ export const IPC = {
   // Auto update
   UPDATE_CHECK: 'app:updateCheck',
   UPDATE_EVENT: 'app:updateEvent',
+  UPDATE_DOWNLOAD: 'app:updateDownload',
   UPDATE_INSTALL: 'app:updateInstall',
   // Native notification
   NOTIFY: 'app:notify',

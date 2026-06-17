@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ToastProvider } from './components/Toast';
+import { UpdateManager } from './components/UpdateManager';
 import { ConnectScreen } from './views/ConnectScreen';
 import { Dashboard } from './views/Dashboard';
 import { Nodes } from './views/Nodes';
@@ -232,6 +233,7 @@ export function App() {
 
   return (
     <ToastProvider>
+      <UpdateManager />
       {profile ? (
         <Shell
           profile={profile}

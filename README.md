@@ -37,6 +37,9 @@ ships with by default.
 ### VM detail — docked in-app console
 ![Dock console](docs/screenshots/18-dock-console.png)
 
+### Auto-update — download, progress, and restart to install
+![Auto-update](docs/screenshots/19-auto-update.png)
+
 ### Helper Scripts — community-scripts.org catalog
 ![Helper Scripts](docs/screenshots/14-helper-scripts.png)
 
@@ -52,12 +55,10 @@ ships with by default.
 ### Light theme
 ![Light theme](docs/screenshots/12-light-theme.png)
 
-## What's new in v1.3.0
+## What's new in v1.5.0
 
-- **Docked in-app console** — open a guest console in a right-side BrowserView panel without leaving the app.
-- **Network & firewall editing** — add/edit/delete node interfaces and datacenter firewall rules.
-- **Node actions** — reboot a node, toggle maintenance mode, and view syslog directly from the node detail modal.
-
+- **Real in-place auto-updater** — ProxTop checks GitHub Releases on launch, notifies when a new version is available, downloads it with a progress bar, and prompts to restart & install.
+- **Rebrand from Proxmox Desktop to ProxTop** — same app, new name.
 <details>
 <summary>More screenshots</summary>
 

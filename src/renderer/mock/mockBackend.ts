@@ -372,12 +372,21 @@ const mockPmx = {
     set: (s: any) => Promise.resolve({ theme: 'dark', confirmDestructive: true, autoCheckUpdates: true, ...s }),
   },
   updates: {
-    check: () => Promise.resolve(ok({ version: '1.1.0' })),
+    check: () => Promise.resolve(ok({ version: '1.5.0' })),
+    download: () => Promise.resolve({ ok: true }),
     install: () => Promise.resolve({ ok: true }),
-    onEvent: (_cb: any) => () => {},
+    onEvent: (cb: any) => {
+      // Simulate: update available → downloading → downloaded
+      setTimeout(() => cb({ event: 'available', version: '1.5.0' }), 800);
+      setTimeout(() => cb({ event: 'downloading', percent: 33 }), 2500);
+      setTimeout(() => cb({ event: 'downloading', percent: 67 }), 3500);
+      setTimeout(() => cb({ event: 'downloading', percent: 100 }), 4500);
+      setTimeout(() => cb({ event: 'downloaded', version: '1.5.0' }), 4700);
+      return () => {};
+    },
   },
   notify: () => Promise.resolve({ ok: true }),
-  version: () => Promise.resolve('1.1.0'),
+  version: () => Promise.resolve('1.4.0'),
   openExternal: () => Promise.resolve({ ok: true }),
 };
 
