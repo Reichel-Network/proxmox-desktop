@@ -62,53 +62,69 @@ export class NodeShell {
     }
     const { ticket, port, user } = res.data.data as { ticket: string; port: string; user: string };
 
-    // 2. Open the websocket
+    // 2. Open the websocket and wait until it is actually ready
     const host = profile.host;
     const wsUrl = `wss://${host}:${profile.port}/api2/json/nodes/${node}/vncwebsocket?port=${encodeURIComponent(
       port
     )}&vncticket=${encodeURIComponent(ticket)}`;
 
-    const ws = new WebSocket(wsUrl, ['binary'], {
-      rejectUnauthorized: profile.verifySsl,
-      headers: { Cookie: `PVEAuthCookie=${ticketCookie}` },
-      handshakeTimeout: 15_000,
-    });
-    this.ws = ws;
+    return new Promise((resolve) => {
+      let settled = false;
+      const ws = new WebSocket(wsUrl, ['binary'], {
+        rejectUnauthorized: profile.verifySsl,
+        headers: { Cookie: `PVEAuthCookie=${ticketCookie}` },
+        handshakeTimeout: 15_000,
+      });
+      this.ws = ws;
 
-    ws.on('open', () => {
-      // 3. Authenticate
-      ws.send(`${user}:${ticket}\n`);
-      this.sendStatus('open');
-      // 4. Keepalive ping every 30s
-      this.keepalive = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) ws.send('2');
-      }, 30_000);
-    });
+      const finish = (ok: boolean, error?: string) => {
+        if (settled) return;
+        settled = true;
+        if (!ok) this.cleanup();
+        resolve({ ok, error });
+      };
 
-    ws.on('message', (raw: WebSocket.RawData) => {
-      const text = raw.toString('binary');
-      // Proxmox prefixes output frames; strip the "0:<len>:" header when present.
-      const m = /^0:\d+:/.exec(text);
-      if (m) {
-        this.sendData(text.slice(m[0].length));
-      } else if (/^[12]:?/.test(text)) {
-        // control/keepalive echoes — ignore
-      } else {
-        this.sendData(text);
-      }
-    });
+      ws.on('open', () => {
+        // 3. Authenticate as the PTY user
+        ws.send(`${user}:${ticket}\n`);
 
-    ws.on('close', () => {
-      this.cleanup();
-      this.sendStatus('closed');
-    });
+        // 4. Give the server a moment to create the PTY and print the prompt.
+        //    Sending commands immediately after the websocket handshake can cause
+        //    Proxmox to drop the connection with "socket hang up".
+        setTimeout(() => {
+          this.sendStatus('open');
+          this.keepalive = setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) ws.send('2');
+          }, 30_000);
+          finish(true);
+        }, 600);
+      });
 
-    ws.on('error', (err: Error) => {
-      this.cleanup();
-      this.sendStatus('error', err.message);
-    });
+      ws.on('message', (raw: WebSocket.RawData) => {
+        const text = raw.toString('binary');
+        // Proxmox prefixes output frames; strip the "0:<len>:" header when present.
+        const m = /^0:\d+:/.exec(text);
+        if (m) {
+          this.sendData(text.slice(m[0].length));
+        } else if (/^[12]:?/.test(text)) {
+          // control/keepalive echoes — ignore
+        } else {
+          this.sendData(text);
+        }
+      });
 
-    return { ok: true };
+      ws.on('close', () => {
+        this.cleanup();
+        this.sendStatus('closed');
+        finish(false, 'Shell connection closed');
+      });
+
+      ws.on('error', (err: Error) => {
+        this.cleanup();
+        this.sendStatus('error', err.message);
+        finish(false, err.message);
+      });
+    });
   }
 
   /** Send user keystrokes to the shell. */
