@@ -64,11 +64,9 @@ const api = {
       node: string,
       storage: string,
       url: string,
-      content: string,
-      checksum?: string,
-      checksumAlgorithm?: string
+      content: string
     ): Promise<ApiResult> =>
-      ipcRenderer.invoke(IPC.STORAGE_DOWNLOAD_URL, node, storage, url, content, checksum, checksumAlgorithm),
+      ipcRenderer.invoke(IPC.STORAGE_DOWNLOAD_URL, node, storage, url, content),
   },
   selectFile: (opts?: SelectFileOptions): Promise<SelectFileResult> =>
     ipcRenderer.invoke(IPC.SELECT_FILE, opts),

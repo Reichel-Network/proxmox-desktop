@@ -543,11 +543,20 @@ ipcMain.handle(
 
 ipcMain.handle(
   IPC.STORAGE_DOWNLOAD_URL,
-  async (_e, node: string, storage: string, url: string, content: string, checksum?: string, checksumAlgorithm?: string) => {
+  async (_e, node: string, storage: string, url: string, content: string) => {
     const c = ensureClient();
-    const params: Record<string, string> = { url, content };
-    if (checksum) params.checksum = checksum;
-    if (checksumAlgorithm) params.checksumAlgorithm = checksumAlgorithm;
-    return c.post(`/nodes/${node}/storage/${storage}/download-url`, params);
+    let filename = '';
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split('/');
+      filename = parts[parts.length - 1] || u.hostname;
+    } catch {
+      filename = url.split('/').pop() || 'download';
+    }
+    return c.post(`/nodes/${node}/storage/${storage}/download-url`, {
+      url,
+      content,
+      filename,
+    });
   }
 );
