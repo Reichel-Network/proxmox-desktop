@@ -111,7 +111,6 @@ export function NodeShellTerminal({
     });
 
     const offStatus = window.pmx.shell.onStatus((s) => {
-      if (transitionRef.current) return;
       const currentNode = activeNodeRef.current;
       setSessions((prev) =>
         prev.map((sess) => (sess.node === currentNode ? { ...sess, status: s } : sess))
@@ -179,6 +178,16 @@ export function NodeShellTerminal({
       }
       setTimeout(() => {
         transitionRef.current = false;
+        // Fallback: if the open status fired while transitionRef was true, run any
+        // pending command now that we know the shell is (or should be) open.
+        const currentNode = activeNodeRef.current;
+        const session = sessionsRef.current.find((sess) => sess.node === currentNode);
+        if (session?.runCommand && !session.ran && session.status.state === 'open') {
+          setSessions((prev) =>
+            prev.map((sess) => (sess.node === currentNode ? { ...sess, ran: true } : sess))
+          );
+          setTimeout(() => window.pmx.shell.input(currentNode, session.runCommand + '\n'), 50);
+        }
       }, 120);
     });
 
