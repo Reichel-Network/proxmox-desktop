@@ -27,8 +27,7 @@ export class ProxmoxClient {
     this.profile = profile;
     this.agent = new https.Agent({
       rejectUnauthorized: profile.verifySsl,
-      keepAlive: true,
-      maxSockets: 8,
+      keepAlive: false,
     });
   }
 
