@@ -4,12 +4,26 @@ import { apiGet } from '../utils/api';
 
 interface Permission {
   path: string;
-  type: 'user' | 'group' | 'token';
+  type: 'user' | 'group' | 'token' | 'role';
   roleid: string;
   userid?: string;
   groupid?: string;
   tokenid?: string;
   propagate?: number;
+}
+
+function parsePermissions(raw: any): Permission[] {
+  if (!raw || typeof raw !== 'object') return [];
+  // /access/permissions returns { data: { "/path": { "RoleName": 1, ... }, ... } }
+  if (Array.isArray(raw)) return raw as Permission[];
+  const rows: Permission[] = [];
+  for (const [path, roles] of Object.entries(raw)) {
+    if (typeof roles !== 'object' || roles === null) continue;
+    for (const roleid of Object.keys(roles)) {
+      rows.push({ path, type: 'role', roleid });
+    }
+  }
+  return rows;
 }
 
 export function Permissions() {
@@ -18,7 +32,7 @@ export function Permissions() {
   const { data, loading, error, refresh } = usePolling<Permission[]>(
     async () => {
       const res = await apiGet<Permission[]>('/access/permissions');
-      return res || [];
+      return parsePermissions(res);
     },
     30000,
     []
