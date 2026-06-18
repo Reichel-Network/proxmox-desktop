@@ -1,6 +1,6 @@
 {
   "name": "proxtop",
-  "version": "1.7.2",
+  "version": "1.7.4",
   "description": "ProxTop — a full-featured desktop client for Proxmox VE",
   "author": "ProxTop",
   "license": "MIT",
@@ -19,7 +19,9 @@
     "preview": "vite preview",
     "start": "cross-env NODE_ENV=production electron .",
     "dist": "npm run build && electron-builder --win --x64",
-    "dist:dir": "npm run build && electron-builder --win --dir",
+    "dist:dir:win": "npm run build && electron-builder --win --dir",
+    "dist:dir:linux": "npm run build && electron-builder --linux --dir",
+    "dist:dir:macos": "npm run build && electron-builder --mac --dir",
     "release": "npm run build && electron-builder --win --x64 --publish always"
   },
   "dependencies": {
@@ -76,6 +78,38 @@
       ],
       "icon": "build/icon.ico",
       "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "Utility",
+      "maintainer": "ProxTop"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.utilities"
     },
     "nsis": {
       "oneClick": false,

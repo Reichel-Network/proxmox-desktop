@@ -1,13 +1,14 @@
 name: Release
 
-# Builds the Windows installer and publishes a GitHub Release whenever a
-# version tag (e.g. v1.2.0) is pushed. electron-builder uploads the NSIS
-# installer, latest.yml, and the blockmap so the in-app auto-updater works.
+# Builds and publishes a GitHub Release when CI succeeds on main for a
+# version-tagged commit. Also supports manual rebuild via workflow_dispatch.
+# electron-builder uploads the NSIS installer, latest.yml, and the blockmap
+# so the in-app auto-updater works.
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       tag:
@@ -18,13 +19,63 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: windows-latest
+  gate:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    outputs:
+      tag: ${{ steps.verify.outputs.tag }}
+      version: ${{ steps.verify.outputs.version }}
+      should_release: ${{ steps.verify.outputs.should_release }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.tag != '' && github.event.inputs.tag || github.event.workflow_run.head_sha || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verify tag version matches package.json
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)
+          fi
+          if [ -z "$TAG" ]; then
+            echo "No version tag found on commit $(git rev-parse HEAD). Skipping release."
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            echo "version=" >> "$GITHUB_OUTPUT"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          VERSION="${TAG#v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag version $TAG does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "Verified tag $TAG matches package.json version $PKG_VERSION"
+
+  release:
+    needs: gate
+    runs-on: windows-latest
+    if: needs.gate.outputs.should_release == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.tag }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -44,10 +95,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
+    needs: gate
     runs-on: ubuntu-latest
+    if: needs.gate.outputs.should_release == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.tag }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -71,10 +126,14 @@ jobs:
           path: release/*
 
   build-macos:
+    needs: gate
     runs-on: macos-latest
+    if: needs.gate.outputs.should_release == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.tag }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
