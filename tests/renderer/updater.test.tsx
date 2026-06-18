@@ -91,15 +91,9 @@ describe('Updater flow', () => {
 
     await completeConnectScreen();
 
-    await act(async () => {
-      emitUpdate({ event: 'checking' });
-    });
-    await act(async () => {
-      emitUpdate({ event: 'available', version: '1.8.0' });
-    });
-    await act(async () => {
-      emitUpdate({ event: 'downloaded', version: '1.8.0' });
-    });
+    act(() => { emitUpdate({ event: 'checking' }); });
+    act(() => { emitUpdate({ event: 'available', version: '1.8.0' }); });
+    act(() => { emitUpdate({ event: 'downloaded', version: '1.8.0' }); });
 
     await waitFor(() => expect(document.querySelector('.update-badge')?.textContent).toMatch(/v1\.8\.0 ready/));
   });
@@ -108,9 +102,7 @@ describe('Updater flow', () => {
     render(<App />);
     await waitForConnectScreen();
 
-    await act(async () => {
-      emitUpdate({ event: 'available', version: '1.8.0' });
-    });
+    act(() => { emitUpdate({ event: 'available', version: '1.8.0' }); });
 
     await waitFor(() => expect(screen.getByText(/A new version of ProxTop is available/)).toBeInTheDocument());
   });
@@ -119,14 +111,10 @@ describe('Updater flow', () => {
     render(<App />);
     await waitForConnectScreen();
 
-    await act(async () => {
-      emitUpdate({ event: 'available', version: '1.8.0' });
-    });
+    act(() => { emitUpdate({ event: 'available', version: '1.8.0' }); });
     await waitFor(() => expect(screen.getByText(/A new version of ProxTop is available/)).toBeInTheDocument());
 
-    await act(async () => {
-      emitUpdate({ event: 'downloaded', version: '1.8.0' });
-    });
+    act(() => { emitUpdate({ event: 'downloaded', version: '1.8.0' }); });
     await waitFor(() => expect(screen.getByText(/is ready/)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /Restart & install/ })).toBeInTheDocument();
   });
