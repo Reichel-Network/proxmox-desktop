@@ -47,6 +47,8 @@ const api = {
       ipcRenderer.invoke(IPC.CONSOLE_WINDOW, node, type, vmid, name),
     embeddedConsoleOpen: (key: string, node: string, type: 'qemu' | 'lxc', vmid: number, name?: string): Promise<ApiResult> =>
       ipcRenderer.invoke(IPC.EMBEDDED_CONSOLE_OPEN, key, node, type, vmid, name),
+    embeddedConsoleBounds: (bounds: { x: number; y: number; width: number; height: number }): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.EMBEDDED_CONSOLE_BOUNDS, bounds),
     embeddedConsoleClose: (): Promise<ApiResult> => ipcRenderer.invoke(IPC.EMBEDDED_CONSOLE_CLOSE),
     onConsoleLayout: (cb: (payload: { panelW: number }) => void) => {
       const listener = (_e: unknown, p: { panelW: number }) => cb(p);

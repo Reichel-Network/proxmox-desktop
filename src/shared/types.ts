@@ -138,6 +138,21 @@ export interface BackupFile {
   subtype?: string;
 }
 
+export interface PveFirewallRule {
+  pos: number;
+  type: 'in' | 'out' | string;
+  action: 'ACCEPT' | 'DROP' | 'REJECT' | string;
+  macro?: string;
+  source?: string;
+  dest?: string;
+  proto?: string;
+  dport?: string;
+  sport?: string;
+  comment?: string;
+  enable?: number;
+  digest?: string;
+}
+
 export interface AppSettings {
   theme: 'dark' | 'light';
   confirmDestructive: boolean;

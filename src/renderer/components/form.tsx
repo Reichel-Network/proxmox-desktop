@@ -3,15 +3,17 @@ import React from 'react';
 export function Field({
   label,
   hint,
+  required,
   children,
 }: {
   label: string;
   hint?: string;
+  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="field">
-      <label>{label}</label>
+      <label>{label}{required && <span style={{ color: '#ef4444', marginLeft: 4 }}>*</span>}</label>
       {children}
       {hint && <div style={{ fontSize: 11.5, color: 'var(--text-faint)', marginTop: 5 }}>{hint}</div>}
     </div>
@@ -24,19 +26,22 @@ export function TextInput({
   placeholder,
   type = 'text',
   onEnter,
+  disabled,
 }: {
   value: string;
-  onChange: (v: string) => void;
+  onChange?: (v: string) => void;
   placeholder?: string;
   type?: string;
   onEnter?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <input
       type={type}
       value={value}
       placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      onChange={(e) => onChange?.(e.target.value)}
       onKeyDown={(e) => e.key === 'Enter' && onEnter?.()}
     />
   );

@@ -55,6 +55,15 @@ ships with by default.
 ### Light theme
 ![Light theme](docs/screenshots/12-light-theme.png)
 
+## What's new in v1.7.0
+
+- **Storage content browser** — click any storage volume to browse ISOs, CT templates, backups, and disk images; delete items in-place.
+- **Command palette actions** — Ctrl+K now shows guest actions (start/stop/reboot/shutdown/suspend/resume) alongside navigation and can execute them directly.
+- **Pools, Users, Permissions** — new management views for cluster pools, access users, and permission matrix.
+- **Per-guest firewall** — edit VM/CT firewall rules inside the guest detail modal.
+- **Node shell tabs** — multi-node terminal sessions with a tab bar, dropdown session switcher, and reconnect button.
+- **Linux/macOS CI builds** — release workflow now produces unsigned `.AppImage` and `.dmg` artifacts.
+
 ## What's new in v1.6.2
 
 - **Test release for auto-updater workflow** — tiny version bump to verify that installed v1.6.1 clients detect, download, and install a new release from GitHub.
@@ -255,3 +264,13 @@ src/
 ## License
 
 MIT
+
+## Platform builds & code signing
+
+| Platform | Artifact | Signing |
+|----------|----------|---------|
+| Windows  | NSIS `.exe` (CI) | Requires an EV or standard code-signing certificate; configure `CSC_LINK` / `CSC_KEY_PASSWORD` in CI or sign locally before distributing. |
+| Linux    | AppImage (CI) | AppImage does not use code signing; users verify the file via checksums. |
+| macOS    | `.dmg` (CI) | Apple notarization and the Gatekeeper warning require a paid Apple Developer ID Application certificate; configure `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`, and `CSC_LINK` / `CSC_KEY_PASSWORD` in CI. |
+
+The current workflows build **unsigned** Linux and macOS artifacts. Windows uses the existing signed-or-unsigned NSIS build path.

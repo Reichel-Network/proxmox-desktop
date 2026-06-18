@@ -215,7 +215,7 @@ function ScriptDetail({ entry, onClose }: { entry: ScriptEntry; onClose: () => v
     return (
       <Modal title={`Install ${entry.name} · ${node}`} onClose={() => { setRunning(false); }} width={900}>
         <div style={{ height: 520 }}>
-          <NodeShellTerminal node={node} runCommand={command || undefined} onClose={() => setRunning(false)} />
+          <NodeShellTerminal node={node} runCommand={command || undefined} nodes={nodes} onClose={() => setRunning(false)} />
         </div>
       </Modal>
     );

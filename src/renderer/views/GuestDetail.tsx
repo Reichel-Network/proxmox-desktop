@@ -10,6 +10,7 @@ import { useToast } from '../components/Toast';
 import { Snapshots } from './Snapshots';
 import { GuestConfig } from './GuestConfig';
 import { GuestNotes } from './GuestNotes';
+import { GuestFirewall } from './GuestFirewall';
 import { MigrateDialog } from './MigrateDialog';
 import type { PveGuest, GuestAction, RrdPoint } from '@shared/types';
 
@@ -20,7 +21,7 @@ const TIMEFRAMES = [
   { key: 'month', label: '30D' },
 ];
 
-type Tab = 'overview' | 'snapshots' | 'config' | 'notes';
+type Tab = 'overview' | 'snapshots' | 'config' | 'notes' | 'firewall';
 
 function chartTime(t: number, tf: string): string {
   const d = new Date(t * 1000);
@@ -133,6 +134,7 @@ export function GuestDetail({
     { key: 'snapshots', label: '📸 Snapshots' },
     { key: 'config', label: '⚙️ Config' },
     { key: 'notes', label: '📝 Notes & Tags' },
+    { key: 'firewall', label: '🛡️ Firewall' },
   ];
 
   return (
@@ -284,6 +286,7 @@ export function GuestDetail({
       {tab === 'snapshots' && <Snapshots guest={guest} />}
       {tab === 'config' && <GuestConfig guest={guest} />}
       {tab === 'notes' && <GuestNotes guest={guest} />}
+      {tab === 'firewall' && <GuestFirewall guest={guest} />}
 
       {migrating && (
         <MigrateDialog guest={guest} onClose={() => setMigrating(false)} onDone={() => {}} />
