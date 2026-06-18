@@ -111,6 +111,73 @@ describe('Proxmox API integration', () => {
     expect(raw).not.toBeNull();
   });
 
+  it('fetches task log for a recent task', async () => {
+    const nodes = await client.get('/nodes');
+    expect(nodes.ok).toBe(true);
+    const nodeList = nodes.data!.data as any[];
+    if (nodeList.length === 0) return;
+    const node = nodeList[0].node;
+
+    const tasks = await client.get(`/nodes/${node}/tasks`, { limit: 5 });
+    expect(tasks.ok).toBe(true);
+    const taskList = tasks.data!.data as any[];
+    if (taskList.length === 0) return;
+
+    const upid = taskList[0].upid;
+    const log = await client.get(`/nodes/${node}/tasks/${upid}/log`);
+    expect(log.ok).toBe(true);
+    expect(Array.isArray(log.data?.data)).toBe(true);
+  });
+
+  it('returns RRD data with numeric time field', async () => {
+    const all = await client.get('/cluster/resources', { type: 'vm' });
+    expect(all.ok).toBe(true);
+    const qemu = (all.data!.data as any[]).filter((r) => r.type === 'qemu');
+
+    let rrd;
+    if (qemu.length > 0) {
+      const g = qemu[0];
+      rrd = await client.get(`/nodes/${g.node}/qemu/${g.vmid}/rrddata`, { timeframe: 'hour', cf: 'AVERAGE' });
+    } else {
+      const nodes = await client.get('/nodes');
+      expect(nodes.ok).toBe(true);
+      const nodeList = nodes.data!.data as any[];
+      if (nodeList.length === 0) return;
+      rrd = await client.get(`/nodes/${nodeList[0].node}/rrddata`, { timeframe: 'hour', cf: 'AVERAGE' });
+    }
+
+    expect(rrd.ok).toBe(true);
+    expect(Array.isArray(rrd.data?.data)).toBe(true);
+    if (rrd.data!.data.length > 0) {
+      expect(typeof rrd.data!.data[0].time).toBe('number');
+    }
+  });
+
+  it('returns a console ticket for the first qemu guest', async () => {
+    const all = await client.get('/cluster/resources', { type: 'vm' });
+    expect(all.ok).toBe(true);
+    const qemu = (all.data!.data as any[]).filter((r) => r.type === 'qemu');
+    if (qemu.length === 0) return;
+
+    const g = qemu[0];
+    const ticket = await client.post(`/nodes/${g.node}/qemu/${g.vmid}/termproxy`);
+    expect(ticket.ok).toBe(true);
+    expect(typeof ticket.data?.data?.ticket).toBe('string');
+    expect(ticket.data!.data.ticket.length).toBeGreaterThan(0);
+  });
+
+  it('lists snapshots for the first qemu guest', async () => {
+    const all = await client.get('/cluster/resources', { type: 'vm' });
+    expect(all.ok).toBe(true);
+    const qemu = (all.data!.data as any[]).filter((r) => r.type === 'qemu');
+    if (qemu.length === 0) return;
+
+    const g = qemu[0];
+    const snaps = await client.get(`/nodes/${g.node}/qemu/${g.vmid}/snapshot`);
+    expect(snaps.ok).toBe(true);
+    expect(Array.isArray(snaps.data?.data)).toBe(true);
+  });
+
   it('reads pools, users, and access ACL', async () => {
     const pools = await client.get('/pools');
     const users = await client.get('/access/users');

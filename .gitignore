@@ -15,3 +15,7 @@ Thumbs.db
 
 # landing page / promo site built separately
 website/
+
+test-results/
+playwright-report/
+tests/e2e/.cache/

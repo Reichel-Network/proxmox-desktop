@@ -60,3 +60,30 @@ jobs:
           PVE_TEST_HOST: ${{ secrets.PVE_TEST_HOST }}
           PVE_TEST_TOKEN: ${{ secrets.PVE_TEST_TOKEN }}
         run: npm run test:integration
+
+  e2e:
+    name: E2E launch (Playwright Electron)
+    runs-on: windows-latest
+    needs: build
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run E2E launch test
+        run: npm run test:e2e

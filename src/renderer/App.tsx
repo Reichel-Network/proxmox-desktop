@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ToastProvider } from './components/Toast';
 import { UpdateManager } from './components/UpdateManager';
-import { useUpdate } from './components/UpdateContext';
+import { useUpdate, UpdateProvider } from './components/UpdateContext';
 import { ConnectScreen } from './views/ConnectScreen';
 import { Dashboard } from './views/Dashboard';
 import { Nodes } from './views/Nodes';
@@ -278,17 +278,19 @@ export function App() {
 
   return (
     <ToastProvider>
-      <UpdateManager />
-      {profile ? (
-        <Shell
-          profile={profile}
-          settings={settings}
-          onSettingsChange={setSettings}
-          onDisconnect={disconnect}
-        />
-      ) : (
-        <ConnectScreen onConnected={setProfile} />
-      )}
+      <UpdateProvider>
+        <UpdateManager />
+        {profile ? (
+          <Shell
+            profile={profile}
+            settings={settings}
+            onSettingsChange={setSettings}
+            onDisconnect={disconnect}
+          />
+        ) : (
+          <ConnectScreen onConnected={setProfile} />
+        )}
+      </UpdateProvider>
     </ToastProvider>
   );
 }
