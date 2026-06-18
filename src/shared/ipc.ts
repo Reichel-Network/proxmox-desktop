@@ -50,6 +50,10 @@ export const IPC = {
   SHELL_RESIZE: 'shell:resize',
   SHELL_CLOSE: 'shell:close',
   SHELL_STATUS: 'shell:status', // main -> renderer: open/closed/error
+  // Storage file operations
+  SELECT_FILE: 'storage:selectFile',
+  STORAGE_UPLOAD: 'storage:upload',
+  STORAGE_DOWNLOAD_URL: 'storage:downloadUrl',
 } as const;
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC];

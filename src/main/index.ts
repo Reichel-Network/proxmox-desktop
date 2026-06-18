@@ -1,4 +1,4 @@
-import { app, BrowserWindow, BrowserView, ipcMain, shell, safeStorage, Notification } from 'electron';
+import { app, BrowserWindow, BrowserView, ipcMain, shell, safeStorage, Notification, dialog } from 'electron';
 import path from 'node:path';
 import Store from 'electron-store';
 import { autoUpdater } from 'electron-updater';
@@ -520,3 +520,34 @@ ipcMain.on(IPC.SHELL_CLOSE, (_e, node: string) => {
   shells.get(node)?.close();
   shells.delete(node);
 });
+
+// ---------------- Storage uploads / downloads ----------------
+ipcMain.handle(IPC.SELECT_FILE, async (e, opts?: { title?: string; filters?: { name: string; extensions: string[] }[] }) => {
+  const win = BrowserWindow.fromWebContents(e.sender) || undefined;
+  const res = await dialog.showOpenDialog(win as any, {
+    title: opts?.title || 'Select file',
+    properties: ['openFile'],
+    filters: opts?.filters || [{ name: 'All files', extensions: ['*'] }],
+  });
+  if (res.canceled || res.filePaths.length === 0) return { ok: false, canceled: true };
+  return { ok: true, path: res.filePaths[0] };
+});
+
+ipcMain.handle(
+  IPC.STORAGE_UPLOAD,
+  async (_e, node: string, storage: string, localPath: string, content: string) => {
+    const c = ensureClient();
+    return c.uploadFile(`/nodes/${node}/storage/${storage}/upload`, localPath, { content });
+  }
+);
+
+ipcMain.handle(
+  IPC.STORAGE_DOWNLOAD_URL,
+  async (_e, node: string, storage: string, url: string, content: string, checksum?: string, checksumAlgorithm?: string) => {
+    const c = ensureClient();
+    const params: Record<string, string> = { url, content };
+    if (checksum) params.checksum = checksum;
+    if (checksumAlgorithm) params.checksumAlgorithm = checksumAlgorithm;
+    return c.post(`/nodes/${node}/storage/${storage}/download-url`, params);
+  }
+);

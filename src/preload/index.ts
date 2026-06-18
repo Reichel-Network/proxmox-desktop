@@ -10,6 +10,9 @@ import type {
   ShellStatus,
 } from '../shared/types';
 
+type SelectFileOptions = { title?: string; filters?: { name: string; extensions: string[] }[] };
+type SelectFileResult = { ok: boolean; path?: string; canceled?: boolean };
+
 const api = {
   profiles: {
     list: (): Promise<ConnectionProfile[]> => ipcRenderer.invoke(IPC.PROFILES_LIST),
@@ -55,7 +58,20 @@ const api = {
       ipcRenderer.on('console:layout', listener);
       return () => ipcRenderer.removeListener('console:layout', listener);
     },
+    storageUpload: (node: string, storage: string, localPath: string, content: string): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.STORAGE_UPLOAD, node, storage, localPath, content),
+    storageDownloadUrl: (
+      node: string,
+      storage: string,
+      url: string,
+      content: string,
+      checksum?: string,
+      checksumAlgorithm?: string
+    ): Promise<ApiResult> =>
+      ipcRenderer.invoke(IPC.STORAGE_DOWNLOAD_URL, node, storage, url, content, checksum, checksumAlgorithm),
   },
+  selectFile: (opts?: SelectFileOptions): Promise<SelectFileResult> =>
+    ipcRenderer.invoke(IPC.SELECT_FILE, opts),
   settings: {
     get: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_GET),
     set: (s: Partial<AppSettings>): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_SET, s),

@@ -1,4 +1,6 @@
 import https from 'node:https';
+import fs from 'node:fs';
+import path from 'node:path';
 import { URL } from 'node:url';
 import type { ConnectionProfile, ApiResult } from '../shared/types';
 
@@ -203,6 +205,107 @@ export class ProxmoxClient {
   post = (path: string, params?: Record<string, any>) => this.request('POST', path, params);
   put = (path: string, params?: Record<string, any>) => this.request('PUT', path, params);
   del = (path: string, params?: Record<string, any>) => this.request('DELETE', path, params);
+
+  /**
+   * Upload a local file as multipart/form-data to a Proxmox storage endpoint.
+   * Used for ISO/CT-template uploads where the file can be multiple gigabytes.
+   */
+  uploadFile(remotePath: string, localPath: string, fields: Record<string, string> = {}): Promise<ApiResult> {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (r: ApiResult) => {
+        if (settled) return;
+        settled = true;
+        resolve(r);
+      };
+
+      const boundary = `----PmxUpload${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+      const filename = path.basename(localPath);
+      let stat: fs.Stats;
+      try {
+        stat = fs.statSync(localPath);
+      } catch (e: any) {
+        return finish({ ok: false, error: `Cannot read file: ${e.message}` });
+      }
+
+      const fieldParts = Object.entries(fields).map(
+        ([k, v]) => `--${boundary}\r\nContent-Disposition: form-data; name="${k}"\r\n\r\n${v}\r\n`
+      );
+      const pre = Buffer.from(
+        [`--${boundary}\r\nContent-Disposition: form-data; name="filename"\r\n\r\n${filename}\r\n`, ...fieldParts,
+          `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\n`,
+          `Content-Type: application/octet-stream\r\n\r\n`,
+        ].join('')
+      );
+      const post = Buffer.from(`\r\n--${boundary}--\r\n`);
+      const contentLength = pre.length + stat.size + post.length;
+
+      let url: URL;
+      try {
+        url = new URL(this.base + remotePath);
+      } catch (e: any) {
+        return finish({ ok: false, error: `Invalid URL: ${e.message}` });
+      }
+
+      const options: https.RequestOptions = {
+        method: 'POST',
+        hostname: url.hostname,
+        port: url.port,
+        path: url.pathname + url.search,
+        agent: this.agent,
+        headers: {
+          Accept: 'application/json',
+          ...this.authHeaders('POST'),
+          'Content-Type': `multipart/form-data; boundary=${boundary}`,
+          'Content-Length': String(contentLength),
+        },
+        timeout: 600_000, // large ISOs can take a while on slow links
+      };
+
+      const req = https.request(options, (res) => {
+        const chunks: Buffer[] = [];
+        res.on('data', (c) => chunks.push(c));
+        res.on('end', () => {
+          const text = Buffer.concat(chunks).toString('utf-8');
+          const status = res.statusCode || 0;
+          let parsed: any = undefined;
+          if (text) {
+            try { parsed = JSON.parse(text); } catch { parsed = { raw: text }; }
+          }
+          if (status >= 200 && status < 300) {
+            finish({ ok: true, status, data: parsed });
+          } else {
+            const errMsg =
+              parsed?.errors ? JSON.stringify(parsed.errors) : parsed?.message || `HTTP ${status}`;
+            finish({ ok: false, status, error: errMsg, data: parsed });
+          }
+        });
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        finish({ ok: false, error: 'Upload timed out (10m)' });
+      });
+      req.on('error', (e: any) => {
+        let msg = e.message || String(e);
+        if (e.code === 'ECONNREFUSED') msg = `Connection refused to ${url.hostname}:${url.port}`;
+        else if (e.code === 'ENOTFOUND') msg = `Host not found: ${url.hostname}`;
+        else if (e.code === 'DEPTH_ZERO_SELF_SIGNED_CERT' || e.code === 'SELF_SIGNED_CERT_IN_CHAIN')
+          msg = 'Self-signed certificate. Disable "Verify SSL" for this connection.';
+        else if (e.code === 'ETIMEDOUT') msg = `Connection timed out to ${url.hostname}:${url.port}`;
+        finish({ ok: false, error: msg });
+      });
+
+      const fileStream = fs.createReadStream(localPath);
+      req.write(pre);
+      fileStream.pipe(req, { end: false });
+      fileStream.on('error', (e) => finish({ ok: false, error: `File read error: ${e.message}` }));
+      fileStream.on('end', () => {
+        req.write(post);
+        req.end();
+      });
+    });
+  }
 
   buildConsoleBaseUrl(): string {
     return `https://${this.profile.host}:${this.profile.port}`;

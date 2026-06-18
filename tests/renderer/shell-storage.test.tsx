@@ -32,7 +32,10 @@ function mockPmx(overrides: Partial<PmxApi> = {}): PmxApi {
       clusterResources: async () => ({ ok: true, data: { data: [] } }),
       rrd: async () => ({ ok: true }),
       tasks: async () => ({ ok: true }),
+      storageUpload: async () => ({ ok: true }),
+      storageDownloadUrl: async () => ({ ok: true }),
     },
+    selectFile: async () => ({ ok: false, canceled: true }),
     shell: {
       open: async () => ({ ok: true }),
       input: () => {},

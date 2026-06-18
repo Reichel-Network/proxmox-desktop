@@ -127,6 +127,8 @@ function StorageBrowser({
     if (c.includes('backup')) return 'backup';
     return 'images';
   });
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState('');
 
   const node = store.node || '';
   const storage = store.storage || '';
@@ -154,7 +156,45 @@ function StorageBrowser({
     }
   }
 
+  async function upload() {
+    const filters = tab === 'iso'
+      ? [{ name: 'ISO images', extensions: ['iso'] }, { name: 'All files', extensions: ['*'] }]
+      : tab === 'vztmpl'
+      ? [{ name: 'Container templates', extensions: ['tar', 'tar.gz', 'tar.xz', 'xz', 'gz'] }, { name: 'All files', extensions: ['*'] }]
+      : [{ name: 'All files', extensions: ['*'] }];
+
+    const picked = await window.pmx.selectFile({
+      title: `Upload ${TABS.find((t) => t.key === tab)?.label}`,
+      filters,
+    });
+    if (!picked.ok || !picked.path) return;
+
+    toast.info(`Uploading ${picked.path.split(/[\\/]/).pop()}…`);
+    const res = await window.pmx.pve.storageUpload(node, storage, picked.path, tab);
+    if (res.ok) {
+      toast.success('Upload complete');
+      setTimeout(() => { refresh(); onDeleted(); }, 600);
+    } else {
+      toast.error(res.error || 'Upload failed');
+    }
+  }
+
+  async function startDownload() {
+    if (!downloadUrl.trim()) return;
+    setDownloadOpen(false);
+    toast.info('Starting download on node…');
+    const res = await window.pmx.pve.storageDownloadUrl(node, storage, downloadUrl.trim(), tab);
+    if (res.ok) {
+      const task = res.data?.data?.task || res.data?.task;
+      toast.success(task ? `Download started (${String(task).slice(0, 40)}…)` : 'Download started');
+      setDownloadUrl('');
+    } else {
+      toast.error(res.error || 'Download failed');
+    }
+  }
+
   const items = data || [];
+  const canUpload = tab === 'iso' || tab === 'vztmpl';
 
   return (
     <div className="modal-overlay" onMouseDown={onClose}>
@@ -188,6 +228,15 @@ function StorageBrowser({
                 </button>
               );
             })}
+          </div>
+
+          <div className="toolbar" style={{ marginBottom: 12 }}>
+            {canUpload && (
+              <button className="btn btn-sm btn-primary" onClick={upload}>⬆ Upload</button>
+            )}
+            <button className="btn btn-sm" onClick={() => setDownloadOpen(true)}>⬇ Download to node</button>
+            <div style={{ flex: 1 }} />
+            <button className="btn btn-sm" onClick={() => refresh()}>↻ Refresh</button>
           </div>
 
           {error && <div className="error-banner">{error}</div>}
@@ -237,9 +286,43 @@ function StorageBrowser({
         </div>
 
         <div className="modal-foot">
-          <button className="btn btn-sm" onClick={() => refresh()}>↻ Refresh</button>
           <button className="btn btn-sm" onClick={onClose}>Close</button>
         </div>
+
+        {downloadOpen && (
+          <div className="modal-overlay" style={{ zIndex: 20 }} onMouseDown={() => setDownloadOpen(false)}>
+            <div className="modal" style={{ maxWidth: 520 }} onMouseDown={(e) => e.stopPropagation()}>
+              <div className="modal-head">
+                <h3>⬇ Download to node</h3>
+                <div style={{ flex: 1 }} />
+                <button className="btn btn-icon btn-sm" onClick={() => setDownloadOpen(false)}>✕</button>
+              </div>
+              <div className="modal-body">
+                <div className="field">
+                  <label>URL to download</label>
+                  <input
+                    type="text"
+                    placeholder="https://example.com/image.iso"
+                    value={downloadUrl}
+                    onChange={(e) => setDownloadUrl(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                <div className="field">
+                  <label>Content type</label>
+                  <input type="text" value={tab.toUpperCase()} disabled />
+                </div>
+                <p className="text-dim" style={{ fontSize: 12, marginTop: 8 }}>
+                  Proxmox will download the file directly to <strong>{storage}</strong> on <strong>{node}</strong>.
+                </p>
+              </div>
+              <div className="modal-foot">
+                <button className="btn" onClick={() => setDownloadOpen(false)}>Cancel</button>
+                <button className="btn btn-primary" disabled={!downloadUrl.trim()} onClick={startDownload}>Start download</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
