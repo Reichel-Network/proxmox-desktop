@@ -157,6 +157,8 @@ export interface AppSettings {
   theme: 'dark' | 'light';
   confirmDestructive: boolean;
   autoCheckUpdates: boolean;
+  autoConnect: boolean;
+  lastProfileId?: string;
 }
 
 // ---- Community Helper Scripts (community-scripts.org) ----

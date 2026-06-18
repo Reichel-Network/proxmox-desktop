@@ -259,11 +259,18 @@ function Shell({
 export function App() {
   const [profile, setProfile] = useState<ConnectionProfile | null>(null);
   const [settings, setSettings] = useState<AppSettings>({
-    theme: 'dark', confirmDestructive: true, autoCheckUpdates: true,
+    theme: 'dark', confirmDestructive: true, autoCheckUpdates: true, autoConnect: true,
   });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [autoConnecting, setAutoConnecting] = useState(true);
 
   useEffect(() => {
-    window.pmx.settings.get().then(setSettings);
+    window.pmx.settings.get().then((s) => {
+      const merged = { ...settings, ...s };
+      setSettings(merged);
+      setSettingsLoaded(true);
+      document.documentElement.setAttribute('data-theme', merged.theme);
+    });
   }, []);
 
   // Apply theme to <html data-theme>
@@ -271,9 +278,54 @@ export function App() {
     document.documentElement.setAttribute('data-theme', settings.theme);
   }, [settings.theme]);
 
+  // Auto-connect to the last used profile on startup.
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    if (!settings.autoConnect || !settings.lastProfileId) {
+      setAutoConnecting(false);
+      return;
+    }
+    let cancelled = false;
+
+    async function tryAutoConnect() {
+      const profiles = await window.pmx.profiles.list();
+      const last = profiles.find((p) => p.id === settings.lastProfileId);
+      if (!last) {
+        setAutoConnecting(false);
+        return;
+      }
+      const res = await window.pmx.session.connect(last);
+      if (cancelled) return;
+      if (res.ok) {
+        setProfile(last);
+      }
+      setAutoConnecting(false);
+    }
+
+    tryAutoConnect().catch(() => setAutoConnecting(false));
+    return () => { cancelled = true; };
+  }, [settingsLoaded, settings.autoConnect, settings.lastProfileId]);
+
+  async function onConnected(p: ConnectionProfile) {
+    setProfile(p);
+    const merged = await window.pmx.settings.set({ lastProfileId: p.id });
+    setSettings(merged);
+  }
+
   async function disconnect() {
     await window.pmx.session.disconnect();
     setProfile(null);
+  }
+
+  if (!settingsLoaded || autoConnecting) {
+    return (
+      <div className="loading-center" style={{ flexDirection: 'column', gap: 12 }}>
+        <span className="spinner spinner-lg" />
+        <span style={{ color: 'var(--text-dim)' }}>
+          {!settingsLoaded ? 'Loading settings…' : 'Reconnecting to last Proxmox host…'}
+        </span>
+      </div>
+    );
   }
 
   return (
@@ -288,7 +340,7 @@ export function App() {
             onDisconnect={disconnect}
           />
         ) : (
-          <ConnectScreen onConnected={setProfile} />
+          <ConnectScreen onConnected={onConnected} />
         )}
       </UpdateProvider>
     </ToastProvider>

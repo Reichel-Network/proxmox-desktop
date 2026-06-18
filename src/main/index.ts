@@ -19,7 +19,7 @@ const store = new Store<StoreShape>({
   name: 'proxtop',
   defaults: {
     profiles: [],
-    settings: { theme: 'dark', confirmDestructive: true, autoCheckUpdates: true },
+    settings: { theme: 'dark', confirmDestructive: true, autoCheckUpdates: true, autoConnect: true },
   },
 });
 

@@ -10,7 +10,7 @@ function mockPmx(overrides: Partial<PmxApi> = {}): PmxApi {
     version: async () => '1.7.2',
     profiles: { list: async () => [], save: async () => [], delete: async () => [] },
     session: { connect: async () => ({ ok: true }), disconnect: async () => true, current: async () => ({ ok: true }) },
-    settings: { get: async () => ({ theme: 'dark', confirmDestructive: true, autoCheckUpdates: true }), set: async () => ({ theme: 'dark', confirmDestructive: true, autoCheckUpdates: true }) },
+    settings: { get: async () => ({ theme: 'dark', confirmDestructive: true, autoCheckUpdates: true, autoConnect: false }), set: async () => ({ theme: 'dark', confirmDestructive: true, autoCheckUpdates: true, autoConnect: false }) },
     pve: {
       get: async () => ({ ok: true, data: { data: [] } }),
       post: async () => ({ ok: true }),
@@ -71,11 +71,18 @@ afterEach(() => {
   emitUpdateCbs = [];
 });
 
+async function waitForConnectScreen() {
+  await screen.findByRole('button', { name: /New Connection/i });
+}
+
 async function completeConnectScreen() {
-  await userEvent.type(screen.getByPlaceholderText('192.168.1.10'), '192.168.1.10');
+  await waitForConnectScreen();
+  const hostInput = await screen.findByPlaceholderText('192.168.1.10');
+  await userEvent.type(hostInput, '192.168.1.10');
   await userEvent.type(screen.getByPlaceholderText('root@pam!mytoken'), 'root@pam!apitoken');
   await userEvent.type(screen.getByPlaceholderText('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'), 'secret-value');
   await userEvent.click(screen.getByRole('button', { name: /⚡\s*Connect/i }));
+  await waitFor(() => expect(screen.getByText(/Connected to 192\.168\.1\.10/)).toBeInTheDocument());
 }
 
 describe('Updater flow', () => {
@@ -83,7 +90,6 @@ describe('Updater flow', () => {
     render(<App />);
 
     await completeConnectScreen();
-    await waitFor(() => expect(screen.getByText(/Connected to 192\.168\.1\.10/)).toBeInTheDocument());
 
     await act(async () => {
       emitUpdate({ event: 'checking' });
@@ -100,6 +106,7 @@ describe('Updater flow', () => {
 
   it('opens update manager modal on available event', async () => {
     render(<App />);
+    await waitForConnectScreen();
 
     await act(async () => {
       emitUpdate({ event: 'available', version: '1.8.0' });
@@ -110,6 +117,7 @@ describe('Updater flow', () => {
 
   it('shows install-ready UI after downloaded event in modal', async () => {
     render(<App />);
+    await waitForConnectScreen();
 
     await act(async () => {
       emitUpdate({ event: 'available', version: '1.8.0' });

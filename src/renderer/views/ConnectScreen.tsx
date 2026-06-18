@@ -83,6 +83,8 @@ export function ConnectScreen({ onConnected }: { onConnected: (p: ConnectionProf
         const updated = await window.pmx.profiles.save(profile);
         setProfiles(updated);
       }
+      // Always remember this as the last-used profile for startup auto-connect.
+      await window.pmx.settings.set({ lastProfileId: profile.id });
       toast.success(`Connected to ${profile.name}`);
       onConnected(profile);
     } finally {

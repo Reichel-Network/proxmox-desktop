@@ -81,6 +81,16 @@ export function Settings({
                 onChange={(e) => set('autoCheckUpdates', e.target.checked)} />
             </label>
           </div>
+          <div className="flex" style={{ justifyContent: 'space-between', marginTop: 12 }}>
+            <div>
+              <div style={{ fontWeight: 500 }}>Automatically connect on startup</div>
+              <div className="text-dim" style={{ fontSize: 12.5 }}>Reconnect to the last used Proxmox host when ProxTop launches</div>
+            </div>
+            <label className="checkbox-row">
+              <input type="checkbox" checked={settings.autoConnect}
+                onChange={(e) => set('autoConnect', e.target.checked)} />
+            </label>
+          </div>
           <div className="flex" style={{ justifyContent: 'space-between' }}>
             <div className="text-dim" style={{ fontSize: 13 }}>
               Current version: <span className="mono">{version || '…'}</span>
